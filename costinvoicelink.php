@@ -3,6 +3,20 @@
 require_once 'costinvoicelink.civix.php';
 
 /**
+ * Implementation of hook civicrm_navigationMenu
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
+ */
+function costinvoicelink_civicrm_navigationMenu( &$params ) {
+  $mafInvoiceMenuOption = array (
+    'name'          =>  ts('Cost invoices'),
+    'url'           =>  CRM_Utils_System::url('civicrm/mafinvoicelist', '', true),
+    'permission'    => 'administer CiviCRM',
+  );
+  _costinvoicelink_civix_insert_navigation_menu($params, 'Contributions', $mafInvoiceMenuOption);
+}
+
+/**
  * Implementation of hook_civicrm_config
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/mafinvoice</path>
+    <page_callback>CRM_Costinvoicelink_Form_Invoice</page_callback>
+    <title>Invoice</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/mafinvoicelist</path>
+    <page_callback>CRM_Costinvoicelink_Page_InvoicesList</page_callback>
+    <title>Invoices List</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>
