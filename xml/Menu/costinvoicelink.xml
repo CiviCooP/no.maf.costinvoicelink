@@ -12,4 +12,16 @@
     <title>Invoices List</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/mafcontactsapply</path>
+    <page_callback>CRM_Costinvoicelink_Form_ApplyContacts</page_callback>
+    <title>ApplyContacts</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/mafactivitiesapply</path>
+    <page_callback>CRM_Costinvoicelink_Form_ApplyActivities</page_callback>
+    <title>ApplyActivities</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>

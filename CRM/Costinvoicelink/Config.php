@@ -18,32 +18,52 @@ class CRM_Costinvoicelink_Config {
   protected $pageInvoiceIdentifierLabel = NULL;
   protected $pageAddButtonLabel = NULL;
   /*
-   * properties to hold the form labels and explanation
+   * properties to hold the contact form labels and explanation
    */
-  protected $formTitle = NULL;
-  protected $formInvoiceIdentifierLabel = NULL;
-  protected $formContactsLabel = NULL;
-  protected $formSourceLabel = NULL;
-  protected $formSourceDateFromLabel = NULL;
-  protected $formSourceDateToLabel = NULL;
-  protected $formContactsButtonLabel = NULL;
-  protected $formFilterActivitiesLabel = NULL;
-  protected $formActivitiesDateFromLabel = NULL;
-  protected $formActivitiesDateToLabel = NULL;
-  protected $formActivityTypesLabel = NULL;
-  protected $formActListSelectLabel = NULL;
-  protected $formActListActTypeLabel = NULL;
-  protected $formActListSubjectLabel = NULL;
-  protected $formActListTargetLabel = NULL;
-  protected $formActListActDateLabel = NULL;
-  protected $formActivitiesButtonLabel = NULL;
+  protected $contactFormHeader = NULL;
+  protected $contactFormApplyButtonLabel = NULL;
+  protected $contactFilterLabel = NULL;
+  protected $sourceDateFromLabel = NULL;
+  protected $sourceDateToLabel = NULL;
+  /*
+   * properties to hold the invoice form labels and explanation
+   */
+  protected $invoiceFormHeader = NULL;
+  protected $invoiceFormInvoiceIdentifierLabel = NULL;
+  protected $externalIdExistsMessage = NULL;
+  /*
+   * properties for source custom group and fields
+   */
+  protected $sourceCustomGroupName = NULL;
+  protected $sourceCustomGroupTable = NULL;
+  protected $sourceCustomGroupId = NULL;
+
+  protected $sourceSourceCustomFieldId = NULL;
+  protected $sourceSourceCustomFieldName = NULL;
+  protected $sourceSourceCustomFieldColumn = NULL;
+
+  protected $sourceDateCustomFieldId = NULL;
+  protected $sourceDateCustomFieldName = NULL;
+  protected $sourceDateCustomFieldColumn = NULL;
+
+  protected $sourceMotivationCustomFieldId = NULL;
+  protected $sourceMotivationCustomFieldName = NULL;
+  protected $sourceMotivationCustomFieldColumn = NULL;
+
+  protected $sourceNoteCustomFieldId = NULL;
+  protected $sourceNoteCustomFieldName = NULL;
+  protected $sourceNoteCustomFieldColumn = NULL;
+
+
 
   /**
    * Constructor
    */
   function __construct() {
     $this->setPageLabels();
-    $this->setFormLabels();
+    $this->setInvoiceFormLabels();
+    $this->setContactFormLabels();
+    $this->createSourceCustomGroupAndFields();
   }
 
   /**
@@ -61,173 +81,233 @@ class CRM_Costinvoicelink_Config {
   }
 
   /**
-   * Function to get the formTitle
+   * Function to get the contact source custom group id
    *
-   * @return string
+   * @return int
    * @access public
    */
-  public function getFormTitle() {
-    return $this->formTitle;
+  public function getSourceCustomGroupId() {
+    return $this->sourceCustomGroupId;
   }
 
   /**
-   * Function to get the formActivitiesButtonLabel
+   * Function to get the contact source custom group name
    *
    * @return string
    * @access public
    */
-  public function getFormActivitiesButtonLabel() {
-    return $this->formActivitiesButtonLabel;
+  public function getSourceCustomGroupName() {
+    return $this->sourceCustomGroupName;
   }
 
   /**
-   * Function to get the formActListActDateLabel
+   * Function to get the contact source custom group table name
    *
    * @return string
    * @access public
    */
-  public function getFormActListDateLabel() {
-    return $this->formActListActDateLabel;
+  public function getSourceCustomGroupTable() {
+    return $this->sourceCustomGroupTable;
   }
 
   /**
-   * Function to get the formActListTargetLabel
+   * Function to get the contact source custom field id
    *
-   * @return string
+   * @return int
    * @access public
    */
-  public function getFormActListTargetLabel() {
-    return $this->formActListTargetLabel;
+  public function getSourceSourceCustomFieldId() {
+    return $this->sourceSourceCustomFieldId;
   }
 
   /**
-   * Function to get the formActListSubjectLabel
+   * Function to get the contact source date custom field id
    *
-   * @return string
+   * @return int
    * @access public
    */
-  public function getFormActListSubjectLabel() {
-    return $this->formActListSubjectLabel;
+  public function getSourceDateCustomFieldId() {
+    return $this->sourceDateCustomFieldId;
   }
 
   /**
-   * Function to get the formActListActTypeLabel
+   * Function to get the contact source motivation custom field id
    *
-   * @return string
+   * @return int
    * @access public
    */
-  public function getFormActListActTypeLabel() {
-    return $this->formActListActTypeLabel;
+  public function getSourceMotivationCustomFieldId() {
+    return $this->sourceMotivationCustomFieldId;
   }
 
   /**
-   * Function to get the formActListSelectLabel
+   * Function to get the contact source note custom field id
    *
-   * @return string
+   * @return int
    * @access public
    */
-  public function getFormActListSelectLabel() {
-    return $this->formActListSelectLabel;
+  public function getSourceNoteCustomFieldId() {
+    return $this->sourceNoteCustomFieldId;
   }
 
   /**
-   * Function to get the formActivityTypesLabel
+   * Function to get the contact source custom field name
    *
    * @return string
    * @access public
    */
-  public function getFormActivityTypesLabel() {
-    return $this->formActivityTypesLabel;
+  public function getSourceSourceCustomFieldName() {
+    return $this->sourceSourceCustomFieldName;
   }
 
   /**
-   * Function to get the formActivitiesDateToLabel
+   * Function to get the contact source custom date field name
    *
    * @return string
    * @access public
    */
-  public function getFormActivitiesDateToLabel() {
-    return $this->formActivitiesDateToLabel;
+  public function getSourceDateCustomFieldName() {
+    return $this->sourceDateCustomFieldName;
   }
 
   /**
-   * Function to get the formActivitiesDateFromLabel
+   * Function to get the contact source motivation custom field name
    *
    * @return string
    * @access public
    */
-  public function getFormActivitiesDateFromLabel() {
-    return $this->formActivitiesDateFromLabel;
+  public function getSourceMotivationCustomFieldName() {
+    return $this->sourceMotivationCustomFieldName;
   }
 
   /**
-   * Function to get the formFilterActivitiesLabel
+   * Function to get the contact source note custom field name
    *
    * @return string
    * @access public
    */
-  public function getFormFilterActivitiesLabel() {
-    return $this->formFilterActivitiesLabel;
+  public function getSourceNoteCustomFieldName() {
+    return $this->sourceNoteCustomFieldName;
   }
 
   /**
-   * Function to get the formContactsButtonLabel
+   * Function to get the contact source custom field column name
    *
    * @return string
    * @access public
    */
-  public function getFormContactsButtonLabel() {
-    return $this->formContactsButtonLabel;
+  public function getSourceSourceCustomFieldColumn() {
+    return $this->sourceSourceCustomFieldColumn;
   }
 
   /**
-   * Function to get the formSourceDateToLabel
+   * Function to get the contact source date custom field column name
    *
    * @return string
    * @access public
    */
-  public function getFormSourceDateToLabel() {
-    return $this->formSourceDateToLabel;
+  public function getSourceDateCustomFieldColumn() {
+    return $this->sourceDateCustomFieldColumn;
   }
 
   /**
-   * Function to get the formSourceDateFromLabel
+   * Function to get the contact source motivation custom field column name
    *
    * @return string
    * @access public
    */
-  public function getFormSourceDateFromLabel() {
-    return $this->formSourceDateFromLabel;
+  public function getSourceMotivationCustomFieldColumn() {
+    return $this->sourceMotivationCustomFieldColumn;
   }
 
   /**
-   * Function to get the formSourceLabel
+   * Function to get the contact source note custom field column name
    *
    * @return string
    * @access public
    */
-  public function getFormSourceLabel() {
-    return $this->formSourceLabel;
+  public function getSourceNoteCustomFieldColumn() {
+    return $this->sourceNoteCustomFieldColumn;
   }
 
   /**
-   * Function to get the formContactsLabel
+   * Function to get the source date from label for contact form
    *
    * @return string
    * @access public
    */
-  public function getFormContactsLabel() {
-    return $this->formContactsLabel;
+  public function getSourceDateFromLabel() {
+    return $this->sourceDateFromLabel;
   }
 
   /**
-   * Function to get the formInvoiceIdentifierLabel
+   * Function to get the source date to label for contact form
    *
    * @return string
    * @access public
    */
-  public function getFormInvoiceIdentifierLabel() {
-    return $this->formInvoiceIdentifierLabel;
+  public function getSourceDateToLabel() {
+    return $this->sourceDateToLabel;
+  }
+
+  /**
+   * Function to get the external id exists message
+   *
+   * @return string
+   * @access public
+   */
+  public function getExternalIdExistsMessage() {
+    return $this->externalIdExistsMessage;
+  }
+
+  /**
+   * Function to get the invoice form header
+   *
+   * @return string
+   * @access public
+   */
+  public function getInvoiceFormHeader() {
+    return $this->invoiceFormHeader;
+  }
+
+  /**
+   * Function to get the contact form header
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactFormHeader() {
+    return $this->contactFormHeader;
+  }
+
+  /**
+   * Function to get the contactFormApplyButtonLabel
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactFormApplyButtonLabel() {
+    return $this->contactFormApplyButtonLabel;
+  }
+
+  /**
+   * Function to get the contactFilterLabel
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactFilterLabel() {
+    return $this->contactFilterLabel;
+  }
+
+  /**
+   * Function to get the invoiceFormInvoiceIdentifierLabel
+   *
+   * @return string
+   * @access public
+   */
+  public function getInvoiceFormInvoiceIdentifierLabel() {
+    return $this->invoiceFormInvoiceIdentifierLabel;
   }
 
   /**
@@ -284,27 +364,94 @@ class CRM_Costinvoicelink_Config {
   }
 
   /**
-   * Function to set the form labels for Invoice Add/Edit
+   * Function to set the form labels for Invoice Add Form
    *
    * @access protected
    */
-  protected function setFormLabels() {
-    $this->formTitle = 'Cost Invoice';
-    $this->formInvoiceIdentifierLabel = ts('Invoice Identifier');
-    $this->formContactsLabel = ts('Contacts');
-    $this->formSourceLabel = ts('Source');
-    $this->formSourceDateFromLabel = ts('Source Date From');
-    $this->formSourceDateToLabel = ts('Source Date To');
-    $this->formContactsButtonLabel = ts('Process Contacts');
-    $this->formFilterActivitiesLabel = ts('Filter Activities');
-    $this->formActivitiesDateFromLabel = ts('Activity Date From');
-    $this->formActivitiesDateToLabel = ts('Activity Date To');
-    $this->formActivityTypesLabel = ts('Activity Type(s)');
-    $this->formActListSelectLabel = ts('Select');
-    $this->formActListActTypeLabel = ts('Activity Type');
-    $this->formActListSubjectLabel = ts('Subject');
-    $this->formActListTargetLabel = ts('Target(s)');
-    $this->formActListActDateLabel = ts('Activity Date');
-    $this->formActivitiesButtonLabel = ts('Process Selected Activities');
+  protected function setInvoiceFormLabels() {
+    $this->invoiceFormHeader = ts('MAF Cost Invoice');
+    $this->invoiceFormInvoiceIdentifierLabel = ts('Invoice Identifier');
+    $this->externalIdExistsMessage = ts('Invoice Identifier already exists in the database, can not be added');
+  }
+
+  /**
+   * Function to set the form labels for Apply Contact Form
+   *
+   * @access protected
+   */
+  protected function setContactFormLabels() {
+    $this->contactFormHeader = ts('Apply MAF Cost Invoice to Contacts');
+    $this->contactFormApplyButtonLabel = ts('Apply to selected contacts');
+    $this->contactFilterLabel = ts('Search contact');
+    $this->sourceDateFromLabel = ts('Source Date From');
+    $this->sourceDateToLabel = ts('Source Date To');
+  }
+
+  /**
+   * Function to create custom group if required
+   *
+   */
+  protected function createSourceCustomGroupAndFields() {
+    $this->sourceCustomGroupName = 'maf_contact_source';
+    $customGroup = CRM_Costinvoicelink_Utils::getCustomGroup($this->sourceCustomGroupName);
+    if (empty($customGroup)) {
+      $this->sourceCustomGroupTable = 'civicrm_value_maf_contact_source';
+      $sourceCustomGroup = CRM_Costinvoicelink_Utils::createCustomGroup($this->sourceCustomGroupName, $this->sourceCustomGroupTable, 'Individual');
+      $this->sourceCustomGroupId = $sourceCustomGroup['id'];
+    } else {
+      $this->sourceCustomGroupId = $customGroup['id'];
+      $this->sourceCustomGroupTable = $customGroup['table_name'];
+    }
+    $this->createSourceCustomFields();
+  }
+
+  /**
+   * Function to create custom fields for contact source custom group
+   *
+   * @access protected
+   */
+  protected function createSourceCustomFields() {
+    $this->sourceSourceCustomFieldName = 'contact_source';
+    $sourceOptionGroup = CRM_Costinvoicelink_Utils::createOptionGroup('maf_contact_source');
+    $customField = $this->createSingleCustomField($this->sourceCustomGroupId, $this->sourceSourceCustomFieldName, 'String', 'Select', 1, $sourceOptionGroup['id']);
+    $this->sourceSourceCustomFieldId = $customField['id'];
+    $this->sourceSourceCustomFieldColumn = $customField['column_name'];
+
+    $this->sourceDateCustomFieldName = 'contact_source_date';
+    $customField = $this->createSingleCustomField($this->sourceCustomGroupId, $this->sourceDateCustomFieldName, 'Date', 'Select Date', 1);
+    $this->sourceDateCustomFieldId = $customField['id'];
+    $this->sourceDateCustomFieldColumn = $customField['column_name'];
+
+    $this->sourceMotivationCustomFieldName = 'contact_source_motivation';
+    $motivationOptionGroup = CRM_Costinvoicelink_Utils::createOptionGroup('maf_contact_source_motivation');
+    $customField = $this->createSingleCustomField($this->sourceCustomGroupId, $this->sourceMotivationCustomFieldName, 'String', 'AdvMulti-Select', 1, $motivationOptionGroup['id']);
+    $this->sourceMotivationCustomFieldId = $customField['id'];
+    $this->sourceMotivationCustomFieldColumn = $customField['column_name'];
+
+    $this->sourceNoteCustomFieldName = 'contact_source_note';
+    $customField = $this->createSingleCustomField($this->sourceCustomGroupId, $this->sourceNoteCustomFieldName, 'Memo', 'TextArea', 0);
+    $this->sourceNoteCustomFieldId = $customField['id'];
+    $this->sourceNoteCustomFieldColumn = $customField['column_name'];
+  }
+
+  /**
+   * Function to create custom Field if not exists
+   *
+   * @param int $customGroupId
+   * @param string $name
+   * @param string $dataType
+   * @param string $htmlType
+   * @param int $isSearchable
+   * @param int $optionGroupId
+   * @param null $defaultValue
+   * @return array
+   * @access protected
+   */
+  protected function createSingleCustomField($customGroupId, $name, $dataType, $htmlType, $isSearchable, $optionGroupId = 0, $defaultValue = NULL) {
+    $customField = CRM_Costinvoicelink_Utils::getCustomField($customGroupId, $name);
+    if (empty($customField)) {
+      $customField = CRM_Costinvoicelink_Utils::createCustomField($customGroupId, $name, $name, $dataType, $htmlType, $isSearchable, $optionGroupId, $defaultValue);
+    }
+    return $customField;
   }
 }

@@ -24,10 +24,12 @@ class CRM_Costinvoicelink_Page_InvoicesList extends CRM_Core_Page {
    */
   protected function setRowActions($invoiceId) {
     $rowActions = array();
-    $updateUrl = CRM_Utils_System::url('civicrm/mafinvoice', 'action=update&iid'.$invoiceId, true);
+    $applyContactsUrl = CRM_Utils_System::url('civicrm/mafcontactsapply', 'action=update&iid'.$invoiceId, true);
+    $applyActivitiesUrl = CRM_Utils_System::url('civicrm/mafactivitiesapply', 'action=update&iid'.$invoiceId, true);
     $deleteUrl = CRM_Utils_System::url('civicrm/mafinvoice', 'action=delete&iid='.$invoiceId, true);
     $rowActions[] = '<a class="action-item" title="Delete" href="'.$deleteUrl.'">Delete</a>';
-    $rowActions[] = '<a class="action-item" title="Edit" href="'.$updateUrl.'">Edit</a>';
+    $rowActions[] = '<a class="action-item" title="ApplyContacts" href="'.$applyContactsUrl.'">Apply to contacts</a>';
+    $rowActions[] = '<a class="action-item" title="ApplyActivities" href="'.$applyActivitiesUrl.'">Apply to activities</a>';
     return $rowActions;
   }
   /**
@@ -42,6 +44,8 @@ class CRM_Costinvoicelink_Page_InvoicesList extends CRM_Core_Page {
     $this->assign('helpTxt', $extensionConfig->getPageHelpTxt());
     $this->assign('invoiceIdentifierLabel', $extensionConfig->getPageInvoiceIdentifierLabel());
     $this->assign('addButtonLabel', $extensionConfig->getPageAddButtonLabel());
+    $session = CRM_Core_Session::singleton();
+    $session->pushUserContext(CRM_Utils_System::url('civicrm/mafinvoicelist', 'reset=1', true));
   }
   /**
    * Function to get invoices

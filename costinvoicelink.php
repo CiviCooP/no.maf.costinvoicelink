@@ -5,15 +5,25 @@ require_once 'costinvoicelink.civix.php';
 /**
  * Implementation of hook civicrm_navigationMenu
  *
+ * @param array $params
+ *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
  */
-function costinvoicelink_civicrm_navigationMenu( &$params ) {
-  $mafInvoiceMenuOption = array (
-    'name'          =>  ts('Cost invoices'),
-    'url'           =>  CRM_Utils_System::url('civicrm/mafinvoicelist', '', true),
-    'permission'    => 'administer CiviCRM',
-  );
-  _costinvoicelink_civix_insert_navigation_menu($params, 'Contributions', $mafInvoiceMenuOption);
+function costinvoicelink_civicrm_navigationMenu(&$params) {
+  $maxKey = _costinvoicelink_getMaxMenuKey($params);
+  $menuParentId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Contributions', 'id', 'name');
+  $params[$menuParentId]['child'][$maxKey+1] = array (
+    'attributes' => array (
+      'label'      => ts('Cost Invoices'),
+      'name'       => ts('Cost Invoices'),
+      'url'        => CRM_Utils_System::url('civicrm/mafinvoicelist', 'reset=1', true),
+      'permission' => 'access CiviContribute',
+      'operator'   => null,
+      'separator'  => null,
+      'parentID'   => $menuParentId,
+      'navID'      => $maxKey+1,
+      'active'     => 1
+    ));
 }
 
 /**
@@ -119,4 +129,27 @@ function costinvoicelink_civicrm_caseTypes(&$caseTypes) {
  */
 function costinvoicelink_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _costinvoicelink_civix_civicrm_alterSettingsFolders($metaDataFolders);
+}
+
+/**
+ * Function to determine max key in navigation menu (core solutions do not cater for child keys!)
+ *
+ * @param array $menuItems
+ * @return int $maxKey
+ */
+function _costinvoicelink_getMaxMenuKey($menuItems) {
+  $maxKey = 0;
+  foreach ($menuItems as $menuKey => $menuItem) {
+    if ($menuKey > $maxKey) {
+      $maxKey = $menuKey;
+    }
+    if (isset($menuItem['child'])) {
+      foreach ($menuItem['child'] as $childKey => $child) {
+        if ($childKey > $maxKey) {
+          $maxKey = $childKey;
+        }
+      }
+    }
+  }
+  return $maxKey;
 }

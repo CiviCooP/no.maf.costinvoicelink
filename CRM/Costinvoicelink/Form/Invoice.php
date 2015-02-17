@@ -10,70 +10,83 @@ require_once 'CRM/Core/Form.php';
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC43/QuickForm+Reference
  */
 class CRM_Costinvoicelink_Form_Invoice extends CRM_Core_Form {
+
+  /**
+   * Overridden parent method to buildQuickForm (call parent method too)
+   */
   function buildQuickForm() {
+    $this->addFormElements();
 
-    // add form elements
-    $this->add(
-      'select', // field type
-      'favorite_color', // field name
-      'Favorite Color', // field label
-      $this->getColorOptions(), // list of options
-      true // is required
-    );
-    $this->addButtons(array(
-      array(
-        'type' => 'submit',
-        'name' => ts('Submit'),
-        'isDefault' => TRUE,
-      ),
-    ));
-
-    // export form elements
-    $this->assign('elementNames', $this->getRenderableElementNames());
     parent::buildQuickForm();
   }
 
-  function postProcess() {
-    $values = $this->exportValues();
-    $options = $this->getColorOptions();
-    CRM_Core_Session::setStatus(ts('You picked color "%1"', array(
-      1 => $options[$values['favorite_color']]
-    )));
-    parent::postProcess();
-  }
-
-  function getColorOptions() {
-    $options = array(
-      '' => ts('- select -'),
-      '#f00' => ts('Red'),
-      '#0f0' => ts('Green'),
-      '#00f' => ts('Blue'),
-      '#f0f' => ts('Purple'),
-    );
-    foreach (array('1','2','3','4','5','6','7','8','9','a','b','c','d','e') as $f) {
-      $options["#{$f}{$f}{$f}"] = ts('Grey (%1)', array(1 => $f));
-    }
-    return $options;
+  /**
+   * Overridden parent method to add validation rules
+   */
+  function addRules() {
+    $this->addFormRule(array('CRM_Costinvoicelink_Form_Invoice', 'validateInvoiceIdentifier'));
   }
 
   /**
-   * Get the fields/elements defined in this form.
-   *
-   * @return array (string)
+   * Overridden parent method to initiate form
    */
-  function getRenderableElementNames() {
-    // The _elements list includes some items which should not be
-    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
-    // items don't have labels.  We'll identify renderable by filtering on
-    // the 'label'.
-    $elementNames = array();
-    foreach ($this->_elements as $element) {
-      /** @var HTML_QuickForm_Element $element */
-      $label = $element->getLabel();
-      if (!empty($label)) {
-        $elementNames[] = $element->getName();
-      }
+  function preProcess() {
+    $extensionConfig = CRM_Costinvoicelink_Config::singleton();
+    if ($this->_action == CRM_Core_Action::ADD) {
+      $actionLabel = 'Add';
+    } else {
+      $actionLabel = 'Edit';
     }
-    return $elementNames;
+    $this->assign('formHeader', $actionLabel.' '.$extensionConfig->getInvoiceFormHeader());
+    /*
+     * if action = delete, execute delete immediately
+     */
+    if ($this->_action == CRM_Core_Action::DELETE) {
+      CRM_Costinvoicelink_BAO_Invoice::deleteById(CRM_Utils_Request::retrieve('iid', 'Positive'));
+      $session = CRM_Core_Session::singleton();
+      $session->setStatus('Cost Invoice deleted', 'Delete', 'success');
+      CRM_Utils_System::redirect($session->readUserContext());
+    }
+  }
+
+  /**
+   * Overridden parent method to process form (calls parent method too)
+   */
+  function postProcess() {
+    $values = $this->exportValues();
+    CRM_Costinvoicelink_BAO_Invoice::add(array('external_id' => $values['external_id']));
+    parent::postProcess();
+  }
+
+  /**
+   * Function to add form elements
+   *
+   * @access protected
+   */
+  protected function addFormElements() {
+    $extensionConfig = CRM_Costinvoicelink_Config::singleton();
+    $this->add('text', 'external_id', $extensionConfig->getInvoiceFormInvoiceIdentifierLabel(), array('size' => CRM_Utils_Type::HUGE), true);
+    $this->addButtons(array(
+      array('type' => 'next', 'name' => ts('Save'), 'isDefault' => true,),
+      array('type' => 'cancel', 'name' => ts('Cancel'))));
+  }
+
+  /**
+   * Function to validate the external_id entered does not exist for add
+   *
+   * @param array $fields
+   * @return array $errors or TRUE
+   * @access public
+   * @static
+   */
+  static function validateInvoiceIdentifier($fields) {
+    $invoice = new CRM_Costinvoicelink_BAO_Invoice();
+    $invoice->external_id = $fields['external_id'];
+    if ($invoice->count() > 0) {
+      $extensionConfig = CRM_Costinvoicelink_Config::singleton();
+      $errors['external_id'] = $extensionConfig->getExternalIdExistsMessage();
+      return $errors;
+    }
+    return TRUE;
   }
 }
