@@ -11,6 +11,17 @@ class CRM_Costinvoicelink_Config {
    */
   static private $_singleton = NULL;
   /*
+   * properties to hold the contact source and contact source motivation option groups
+   */
+  protected $contactSourceOptionGroupId = NULL;
+  protected $contactSourceMotivationOptionGroupId = NULL;
+  /*
+   * generic form labels
+   */
+  protected $cancelButtonLabel = NULL;
+  protected $selectLabel = NULL;
+
+  /*
    * properties to hold the page labels
    */
   protected $pageTitle = NULL;
@@ -22,9 +33,16 @@ class CRM_Costinvoicelink_Config {
    */
   protected $contactFormHeader = NULL;
   protected $contactFormApplyButtonLabel = NULL;
+  protected $contactSearchButtonLabel = NULL;
   protected $contactFilterLabel = NULL;
   protected $sourceDateFromLabel = NULL;
   protected $sourceDateToLabel = NULL;
+
+  protected $contactDisplayNameLabel = NULL;
+  protected $contactContactTypeLabel = NULL;
+  protected $contactSourceLabel = NULL;
+  protected $contactSourceDateLabel = NULL;
+  protected $contactSourceMotivationLabel = NULL;
   /*
    * properties to hold the invoice form labels and explanation
    */
@@ -60,6 +78,8 @@ class CRM_Costinvoicelink_Config {
    * Constructor
    */
   function __construct() {
+    $this->cancelButtonLabel = ts('Cancel');
+    $this->selectLabel = ts('Select');
     $this->setPageLabels();
     $this->setInvoiceFormLabels();
     $this->setContactFormLabels();
@@ -78,6 +98,26 @@ class CRM_Costinvoicelink_Config {
       self::$_singleton = new CRM_Costinvoicelink_Config();
     }
     return self::$_singleton;
+  }
+
+  /**
+   * Function to get the option group id of the contact source
+   *
+   * @return int
+   * @access public
+   */
+  public function getContactSourceOptionGroupId() {
+    return $this->contactSourceOptionGroupId;
+  }
+
+  /**
+   * Function to get the option group id of the contact source motivation
+   *
+   * @return null
+   * @access public
+   */
+  public function getContactSourceMotivationOptionGroupId() {
+    return $this->contactSourceMotivationOptionGroupId;
   }
 
   /**
@@ -231,6 +271,76 @@ class CRM_Costinvoicelink_Config {
   }
 
   /**
+   * Function to get the cancel button form Label
+   *
+   * @return string
+   * @access public
+   */
+  public function getCancelButtonLabel() {
+    return $this->cancelButtonLabel;
+  }
+
+  /**
+   * Function to get the select label
+   *
+   * @return string
+   * @access public
+   */
+  public function getSelectLabel() {
+    return $this->selectLabel;
+  }
+
+  /**
+   * Function to get the contact source label for contact form
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactSourceLabel() {
+    return $this->contactSourceLabel;
+  }
+
+  /**
+   * Function to get the contact display name form label
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactDisplayNameLabel() {
+    return $this->contactDisplayNameLabel;
+  }
+
+  /**
+   * Function to get the contact type form label
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactContactTypeLabel() {
+    return $this->contactContactTypeLabel;
+  }
+
+  /**
+   * Function to get the contact source date label
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactSourceDateLabel() {
+    return $this->contactSourceDateLabel;
+  }
+
+  /**
+   * Function to get the contact source motivation label
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactSourceMotivationLabel() {
+    return $this->contactSourceMotivationLabel;
+  }
+
+  /**
    * Function to get the source date from label for contact form
    *
    * @return string
@@ -288,6 +398,16 @@ class CRM_Costinvoicelink_Config {
    */
   public function getContactFormApplyButtonLabel() {
     return $this->contactFormApplyButtonLabel;
+  }
+
+  /**
+   * Function to get the contactSearchButtonLabel
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactSearchButtonLabel() {
+    return $this->contactSearchButtonLabel;
   }
 
   /**
@@ -382,9 +502,15 @@ class CRM_Costinvoicelink_Config {
   protected function setContactFormLabels() {
     $this->contactFormHeader = ts('Apply MAF Cost Invoice to Contacts');
     $this->contactFormApplyButtonLabel = ts('Apply to selected contacts');
+    $this->contactSearchButtonLabel = ts('Search contacts');
     $this->contactFilterLabel = ts('Search contact');
+    $this->contactSourceLabel = ts('Contact source');
     $this->sourceDateFromLabel = ts('Source Date From');
     $this->sourceDateToLabel = ts('Source Date To');
+    $this->contactDisplayNameLabel = ts('Contact Name');
+    $this->contactContactTypeLabel = ts('Contact Type');
+    $this->contactSourceDateLabel = ts('Contact Source Date');
+    $this->contactSourceMotivationLabel = ts('Contact Source Motivation');
   }
 
   /**
@@ -396,7 +522,7 @@ class CRM_Costinvoicelink_Config {
     $customGroup = CRM_Costinvoicelink_Utils::getCustomGroup($this->sourceCustomGroupName);
     if (empty($customGroup)) {
       $this->sourceCustomGroupTable = 'civicrm_value_maf_contact_source';
-      $sourceCustomGroup = CRM_Costinvoicelink_Utils::createCustomGroup($this->sourceCustomGroupName, $this->sourceCustomGroupTable, 'Individual');
+      $sourceCustomGroup = CRM_Costinvoicelink_Utils::createCustomGroup($this->sourceCustomGroupName, $this->sourceCustomGroupTable, 'Contact');
       $this->sourceCustomGroupId = $sourceCustomGroup['id'];
     } else {
       $this->sourceCustomGroupId = $customGroup['id'];
@@ -413,6 +539,7 @@ class CRM_Costinvoicelink_Config {
   protected function createSourceCustomFields() {
     $this->sourceSourceCustomFieldName = 'contact_source';
     $sourceOptionGroup = CRM_Costinvoicelink_Utils::createOptionGroup('maf_contact_source');
+    $this->contactSourceOptionGroupId = $sourceOptionGroup['id'];
     $customField = $this->createSingleCustomField($this->sourceCustomGroupId, $this->sourceSourceCustomFieldName, 'String', 'Select', 1, $sourceOptionGroup['id']);
     $this->sourceSourceCustomFieldId = $customField['id'];
     $this->sourceSourceCustomFieldColumn = $customField['column_name'];
@@ -424,6 +551,7 @@ class CRM_Costinvoicelink_Config {
 
     $this->sourceMotivationCustomFieldName = 'contact_source_motivation';
     $motivationOptionGroup = CRM_Costinvoicelink_Utils::createOptionGroup('maf_contact_source_motivation');
+    $this->contactSourceMotivationOptionGroupId = $motivationOptionGroup['id'];
     $customField = $this->createSingleCustomField($this->sourceCustomGroupId, $this->sourceMotivationCustomFieldName, 'String', 'AdvMulti-Select', 1, $motivationOptionGroup['id']);
     $this->sourceMotivationCustomFieldId = $customField['id'];
     $this->sourceMotivationCustomFieldColumn = $customField['column_name'];

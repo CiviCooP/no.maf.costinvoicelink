@@ -8,13 +8,13 @@
           {$form.contactSourceFilter.html}
           &nbsp;&nbsp;&nbsp;
           <label>{$sourceDateFromLabel}</label>
-          {include file="CRM/common/jcalendar.tpl" elementName=source_date_from}
+          {include file="CRM/common/jcalendar.tpl" elementName=sourceDateFrom}
           &nbsp;&nbsp;&nbsp;
           <label>{$sourceDateToLabel}</label>
-          {include file="CRM/common/jcalendar.tpl" elementName=source_date_to}
+          {include file="CRM/common/jcalendar.tpl" elementName=sourceDateTo}
         </div>
       </div>
-      {* <input id="_qf_Search_refresh" class="form-submit" type="submit" value="Search Contacts" name="_qf_Search_refresh"> *}
+      <input id="_qf_Search_refresh" class="form-submit" type="submit" value="{$contactSearchButtonLabel}" name="_qf_ApplyContacts_submit">
     </div>
   </div>
 </div>

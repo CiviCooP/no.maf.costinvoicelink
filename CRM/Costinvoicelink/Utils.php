@@ -205,4 +205,30 @@ class CRM_Costinvoicelink_Utils {
     }
     return implode(' ', $labelExplode);
   }
+
+  /**
+   * Function to get option label for option value/option group id
+   *
+   * @param mixed $optionValue
+   * @param int $optionGroupId
+   * @return string $optionLabel
+   * @access public
+   * @static
+   */
+  public static function getOptionValueLabel($optionValue, $optionGroupId) {
+    $optionLabel = '';
+    if (!empty($optionValue) && !empty($optionGroupId)) {
+      $params = array(
+        'option_group_id' => $optionGroupId,
+        'value' => $optionValue,
+        'return' => 'label'
+      );
+      try {
+        $optionLabel = civicrm_api3('OptionValue', 'Getvalue', $params);
+      } catch (CiviCRM_API3_Exception $ex) {
+        $optionLabel = '';
+      }
+    }
+    return $optionLabel;
+  }
 }
