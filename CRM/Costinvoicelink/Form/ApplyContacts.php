@@ -11,7 +11,7 @@ require_once 'CRM/Core/Form.php';
  */
 class CRM_Costinvoicelink_Form_ApplyContacts extends CRM_Core_Form {
 
-  protected $contactSources;
+  protected $contactSources = NULL;
   protected $csFilter = NULL;
   protected $dfFilter = NULL;
   protected $dtFilter = NULL;
@@ -34,6 +34,7 @@ class CRM_Costinvoicelink_Form_ApplyContacts extends CRM_Core_Form {
    */
   function setDefaultValues() {
     $defaults = array();
+    $defaults['invoice_id'] = CRM_Utils_Request::retrieve('iid', 'Positive');
     if ($this->processFilter == TRUE) {
       $selectedContacts = $this->selectContacts();
       $this->assign('mafContacts', $selectedContacts);
@@ -108,13 +109,16 @@ class CRM_Costinvoicelink_Form_ApplyContacts extends CRM_Core_Form {
     }
     parent::postProcess();
   }
+
   /**
-   * Function to process selected search filters
+   * Function to get the url params for the selected filters
    *
+   * @return string
    * @access protected
    */
-  protected function processSearchContact() {
+  protected function getFiltersUrlParams() {
     $urlParams = array();
+    $urlParams[] = 'iid='.$this->_submitValues['invoice_id'];
     if (isset($this->_submitValues['contactSourceFilter']) && !empty($this->_submitValues['contactSourceFilter'])) {
       $urlParams[] = 'cs='.$this->_submitValues['contactSourceFilter'];
     }
@@ -129,16 +133,59 @@ class CRM_Costinvoicelink_Form_ApplyContacts extends CRM_Core_Form {
     } else {
       $paramString = 'reset=1&'.implode('&', $urlParams);
     }
+    return $paramString;
+  }
+
+  /**
+   * Function to process selected search filters
+   *
+   * @access protected
+   */
+  protected function processSearchContact() {
+    if (empty($this->_submitValues['contactSourceFilter'])) {
+      $session = CRM_Core_Session::singleton();
+      $session->setStatus('You have to select a contact source to search with', 'No contact source selected', 'error');
+    }
+    $paramString = $this->getFiltersUrlParams();
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/mafcontactsapply', $paramString, true));
   }
+
   /**
    * Function to apply cost invoice to all selected contacts
    *
    * @access protected
    */
   protected function processApplyContacts() {
-    CRM_Core_Error::debug('submitValues', $this->_submitValues);
-    exit();
+    $session = CRM_Core_Session::singleton();
+    if (!isset($this->_submitValues['selectedContacts']) || empty($this->_submitValues['selectedContacts'])) {
+      $session->setStatus('No contacts to apply the cost invoice to were selected', 'No contacts selected', 'error');
+      $paramString = $this->getFiltersUrlParams();
+      CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/mafcontactsapply', $paramString, true));
+    } else {
+      foreach ($this->_submitValues['selectedContacts'] as $selectedContactId) {
+        $this->linkCostInvoiceToContact($selectedContactId);
+      }
+      $session->setStatus('Cost Invoice applied to selected contacts', 'Cost Invoice Applied', 'success');
+      CRM_Utils_System::redirect($session->readUserContext());
+    }
+  }
+
+  /**
+   * Function to link invoice to contact
+   *
+   * @param $contactId
+   * @access protected
+   */
+  protected function linkCostInvoiceToContact($contactId) {
+    $params = array(
+      'invoice_id' => $this->_submitValues['invoice_id'],
+      'entity' => 'Contact',
+      'entity_id' => $contactId);
+    $existingLinks = CRM_Costinvoicelink_BAO_InvoiceEntity::getValues($params);
+    if (empty($existingLinks)) {
+      $params['linked_date'] = date('Ymd');
+      CRM_Costinvoicelink_BAO_InvoiceEntity::add($params);
+    }
   }
 
   /**
@@ -148,7 +195,8 @@ class CRM_Costinvoicelink_Form_ApplyContacts extends CRM_Core_Form {
    */
   protected function addFormElements() {
     $extensionConfig = CRM_Costinvoicelink_Config::singleton();
-    $this->add('select', 'contactSourceFilter', $extensionConfig->getContactSourceLabel(), $this->contactSources);
+    $this->add('text', 'invoice_id', ts('InvoiceId'));
+    $this->add('select', 'contactSourceFilter', $extensionConfig->getContactSourceLabel(), $this->contactSources, true);
     $this->addDate('sourceDateFrom', $extensionConfig->getSourceDateFromLabel(), false);
     $this->addDate('sourceDateTo', $extensionConfig->getSourceDateToLabel(), false);
     $this->addButtons(array(
@@ -163,7 +211,9 @@ class CRM_Costinvoicelink_Form_ApplyContacts extends CRM_Core_Form {
    */
   protected function getContactSources() {
     $extensionConfig = CRM_Costinvoicelink_Config::singleton();
-    $params = array('option_group_id' => $extensionConfig->getContactSourceOptionGroupId());
+    $params = array(
+      'option_group_id' => $extensionConfig->getContactSourceOptionGroupId(),
+      'options' => array('limit' => 0));
     try {
       $optionValues = civicrm_api3('OptionValue', 'Get', $params);
       foreach ($optionValues['values'] as $optionValue) {
@@ -177,29 +227,40 @@ class CRM_Costinvoicelink_Form_ApplyContacts extends CRM_Core_Form {
   }
 
   /**
-   * Function to select contacts based on filters
+   * Function to build contact query
+   *
+   * @return string
+   * @access protected
+   */
+  protected function buildContactQuery() {
+    $extensionConfig = CRM_Costinvoicelink_Config::singleton();
+    $contactQuery = '
+    SELECT cc.id, cc.contact_type, cc.display_name, cus.'.$extensionConfig->getSourceSourceCustomFieldColumn().',
+     '.$extensionConfig->getSourceDateCustomFieldColumn().', '.$extensionConfig->getSourceMotivationCustomFieldColumn().'
+    FROM civicrm_contact cc
+    LEFT JOIN '.$extensionConfig->getSourceCustomGroupTable().' cus ON cc.id = cus.entity_id';
+    $contactWhere = 'WHERE cc.id NOT IN(SELECT contact_id FROM civicrm_activity_contact)';
+    if (!empty($this->csFilter)) {
+      $contactWhere .= ' AND cus.'.$extensionConfig->getSourceSourceCustomFieldColumn().' = '.$this->csFilter;
+    }
+    return $contactQuery.' '.$contactWhere;
+  }
+
+  /**
+   * Function to select contacts
+   * - always only select those contacts that do not have any activities
+   * - add filters if required
    *
    * @return array $contacts
-   * @throws Exception when error from API
    */
   protected function selectContacts() {
-    $params = array(
-      'is_deceased' => 0,
-      'is_deleted' => 0,
-      'options' => array('limit' => 0),
-      'return' => array($this->sourceDateCustomField, $this->sourceMotivationCustomField, 'display_name', 'contact_type'));
-    if (isset($this->csFilter) && !empty($this->csFilter)) {
-      $params[$this->sourceCustomField] = $this->csFilter;
-    }
-    try {
-      $apiContacts = civicrm_api3('Contact', 'Get', $params);
-      foreach ($apiContacts['values'] as $contactId => $apiContact) {
-        if ($this->contactInDateRange($apiContact) == TRUE) {
-          $contacts[$contactId] = $this->createContactRow($apiContact);
-        }
+    $contacts = array();
+    $contactQuery = $this->buildContactQuery();
+    $daoContact = CRM_Core_DAO::executeQuery($contactQuery);
+    while ($daoContact->fetch()) {
+      if ($this->contactInDateRange($daoContact) == TRUE) {
+        $contacts[$daoContact->id] = $this->createContactRow($daoContact);
       }
-    } catch (CiviCRM_API3_Exception $ex) {
-      throw new Exception('Error when searching for contacts, message from API Contact Get: '.$ex->getMessage());
     }
     return $contacts;
   }
@@ -207,19 +268,28 @@ class CRM_Costinvoicelink_Form_ApplyContacts extends CRM_Core_Form {
   /**
    * Function to create a row for a contact
    *
-   * @param array $contact
+   * @param object $daoContact
    * @return array $row
    * @access protected
    */
-  protected function createContactRow($contact) {
+  protected function createContactRow($daoContact) {
     $row = array();
-    $row['display_name'] = $contact['display_name'];
-    $row['contact_type'] = $contact['contact_type'];
+    $row['display_name'] = $daoContact->display_name;
+    $row['contact_type'] = $daoContact->contact_type;
     $extensionConfig = CRM_Costinvoicelink_Config::singleton();
+    $sourceColumn = $extensionConfig->getSourceSourceCustomFieldColumn();
+    $motivationColumn = $extensionConfig->getSourceMotivationCustomFieldColumn();
+    $dateColumn = $extensionConfig->getSourceDateCustomFieldColumn();
     $sourceOptionGroupId = $extensionConfig->getContactSourceOptionGroupId();
-    $row['source'] = CRM_Costinvoicelink_Utils::getOptionValueLabel($contact[$this->sourceCustomField], $sourceOptionGroupId);
-    $row['source_date'] = $contact[$this->sourceDateCustomField];
-    $row['source_motivation'] = $this->sourceMotivationToString($contact[$this->sourceMotivationCustomField]);
+    if (isset($daoContact->$sourceColumn)) {
+      $row['source'] = CRM_Costinvoicelink_Utils::getOptionValueLabel($daoContact->$sourceColumn, $sourceOptionGroupId);
+    }
+    if (isset($daoContact->$dateColumn)) {
+      $row['source_date'] = $daoContact->$dateColumn;
+    }
+    if (isset($daoContact->$motivationColumn) && !empty($daoContact->$motivationColumn)) {
+      $row['source_motivation'] = $this->sourceMotivationToString($daoContact->$motivationColumn);
+    }
     return $row;
   }
 
@@ -227,32 +297,34 @@ class CRM_Costinvoicelink_Form_ApplyContacts extends CRM_Core_Form {
    * Function to convert array with source motivations into string
    *
    * @param array $sourceMotivations
-   * @return string
+   * @return string $motivationString
    * @access protected
    */
   protected function sourceMotivationToString($sourceMotivations) {
     $motivationArray = array();
     $extensionConfig = CRM_Costinvoicelink_Config::singleton();
     $motivationOptionGroupId = $extensionConfig->getContactSourceMotivationOptionGroupId();
-    if (!empty($sourceMotivations)) {
+    if (is_array($sourceMotivations)) {
       foreach ($sourceMotivations as $sourceMotivation) {
         $motivationArray[] = CRM_Costinvoicelink_Utils::getOptionValueLabel($sourceMotivation, $motivationOptionGroupId);
       }
+      $motivationString = implode('; ', $motivationArray);
+    } else {
+      $motivationString = CRM_Costinvoicelink_Utils::getOptionValueLabel($sourceMotivations, $motivationOptionGroupId);
     }
-    return implode('; ', $motivationArray);
+    return $motivationString;
   }
 
   /**
    * Function to check if the contact is in the filtered date range
    *
-   * @param array $contact
+   * @param object $daoContact
    * @return boolean
    * @access protected
    */
-  protected function contactInDateRange($contact) {
-    $toFilter = FALSE;
+  protected function contactInDateRange($daoContact) {
     if (!empty($this->dfFilter)) {
-      if ($contact[$this->sourceDateCustomField] >= date('Y-m-d', strtotime($this->dfFilter))) {
+      if ($daoContact->{$this->sourceDateCustomField} >= date('Y-m-d', strtotime($this->dfFilter))) {
         $fromFilter = TRUE;
       } else {
         $fromFilter = FALSE;
@@ -261,7 +333,7 @@ class CRM_Costinvoicelink_Form_ApplyContacts extends CRM_Core_Form {
       $fromFilter = TRUE;
     }
     if (!empty($this->dtFilter)) {
-      if ($contact[$this->sourceDateCustomField] <= date('Y-m-d', strtotime($this->dtFilter))) {
+      if ($daoContact->{$this->sourceDateCustomField} <= date('Y-m-d', strtotime($this->dtFilter))) {
         $toFilter = TRUE;
       } else {
         $toFilter = FALSE;

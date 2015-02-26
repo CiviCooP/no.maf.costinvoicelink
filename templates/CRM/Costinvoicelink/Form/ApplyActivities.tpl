@@ -1,27 +1,14 @@
-{* HEADER *}
-
-<div class="crm-submit-buttons">
-{include file="CRM/common/formButtons.tpl" location="top"}
+{* filter activities *}
+<div class="crm-section">
+  <div hidden="1" class="content">{$form.invoice_id.html}</div>
+  <div class="clear"></div>
 </div>
 
-{* FIELD EXAMPLE: OPTION 1 (AUTOMATIC LAYOUT) *}
+{include file="CRM/Costinvoicelink/Form/ActivityFilter.tpl"}
 
-{foreach from=$elementNames item=elementName}
-  <div class="crm-section">
-    <div class="label">{$form.$elementName.label}</div>
-    <div class="content">{$form.$elementName.html}</div>
-    <div class="clear"></div>
-  </div>
-{/foreach}
+{* list of selected activities *}
+{include file="CRM/Costinvoicelink/Page/ActivityList.tpl"}
 
-{* FIELD EXAMPLE: OPTION 2 (MANUAL LAYOUT)
-
-  <div>
-    <span>{$form.favorite_color.label}</span>
-    <span>{$form.favorite_color.html}</span>
-  </div>
-
-{* FOOTER *}
 <div class="crm-submit-buttons">
-{include file="CRM/common/formButtons.tpl" location="bottom"}
+  {include file="CRM/common/formButtons.tpl" location="bottom"}
 </div>

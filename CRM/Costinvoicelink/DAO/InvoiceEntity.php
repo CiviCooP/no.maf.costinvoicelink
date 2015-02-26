@@ -1,11 +1,11 @@
 <?php
 /**
- * DAO Invoice for cost invoice details
+ * DAO Invoice for cost invoice entity
  *
  * @author Erik Hommel (CiviCooP) <erik.hommel@civicoop.org>
  * @license AGPL-3.0
  */
-class CRM_Costinvoicelink_DAO_Invoice extends CRM_Core_DAO {
+class CRM_Costinvoicelink_DAO_InvoiceEntity extends CRM_Core_DAO {
   /**
    * static instance to hold the field values
    *
@@ -19,7 +19,7 @@ class CRM_Costinvoicelink_DAO_Invoice extends CRM_Core_DAO {
    * empty definition for virtual function
    */
   static function getTableName() {
-    return 'civicrm_maf_invoice';
+    return 'civicrm_maf_invoice_entity';
   }
   /**
    * returns all the column names of this table
@@ -35,10 +35,22 @@ class CRM_Costinvoicelink_DAO_Invoice extends CRM_Core_DAO {
           'type' => CRM_Utils_Type::T_INT,
           'required' => true
         ) ,
-        'external_id' => array(
-          'name' => 'external_id',
+        'invoice_id' => array(
+          'name' => 'invoice_id',
+          'type' => CRM_Utils_Type::T_INT,
+        ) ,
+        'entity' => array(
+          'name' => 'entity',
           'type' => CRM_Utils_Type::T_STRING,
           'maxlength' => 45,
+        ) ,
+        'entity_id' => array(
+          'name' => 'entity_id',
+          'type' => CRM_Utils_Type::T_INT,
+        ) ,
+        'linked_date' => array(
+          'name' => 'linked_date',
+          'type' => CRM_Utils_Type::T_DATE,
         ) ,
       );
     }
@@ -55,7 +67,10 @@ class CRM_Costinvoicelink_DAO_Invoice extends CRM_Core_DAO {
     if (!(self::$_fieldKeys)) {
       self::$_fieldKeys = array(
         'id' => 'id',
-        'external_id' => 'external_id',
+        'invoice_id' => 'invoice_id',
+        'entity' => 'entity',
+        'entity_id' => 'entity_id',
+        'linked_date' => 'linked_date'
       );
     }
     return self::$_fieldKeys;

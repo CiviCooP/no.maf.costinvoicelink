@@ -24,8 +24,8 @@ class CRM_Costinvoicelink_Page_InvoicesList extends CRM_Core_Page {
    */
   protected function setRowActions($invoiceId) {
     $rowActions = array();
-    $applyContactsUrl = CRM_Utils_System::url('civicrm/mafcontactsapply', 'action=update&iid'.$invoiceId, true);
-    $applyActivitiesUrl = CRM_Utils_System::url('civicrm/mafactivitiesapply', 'action=update&iid'.$invoiceId, true);
+    $applyContactsUrl = CRM_Utils_System::url('civicrm/mafcontactsapply', 'action=update&iid='.$invoiceId, true);
+    $applyActivitiesUrl = CRM_Utils_System::url('civicrm/mafactivitiesapply', 'action=update&iid='.$invoiceId, true);
     $deleteUrl = CRM_Utils_System::url('civicrm/mafinvoice', 'action=delete&iid='.$invoiceId, true);
     $rowActions[] = '<a class="action-item" title="Delete" href="'.$deleteUrl.'">Delete</a>';
     $rowActions[] = '<a class="action-item" title="ApplyContacts" href="'.$applyContactsUrl.'">Apply to contacts</a>';

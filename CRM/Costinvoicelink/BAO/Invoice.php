@@ -1,7 +1,7 @@
 <?php
 
 /**
- * BAO Inovice for dealing with cost invoice records
+ * BAO Invoice for dealing with cost invoice records
  *
  * @author Erik Hommel (CiviCooP) <erik.hommel@civicoop.org>
  * @license AGPL-3.0
@@ -11,7 +11,6 @@ class CRM_Costinvoicelink_BAO_Invoice extends CRM_Costinvoicelink_DAO_Invoice {
   /**
    * Function to get values
    *
-   * @author Erik Hommel (CiviCooP) <erik.hommel@civicoop.org>
    * @return array $result found rows with data
    * @access public
    * @static
@@ -39,7 +38,6 @@ class CRM_Costinvoicelink_BAO_Invoice extends CRM_Costinvoicelink_DAO_Invoice {
   /**
    * Function to add or update cost invoice
    *
-   * @author Erik Hommel (CiviCooP) <erik.hommel@civicoop.org>
    * @param array $params
    * @return array $result
    * @throws Exception when params is empty
@@ -73,6 +71,10 @@ class CRM_Costinvoicelink_BAO_Invoice extends CRM_Costinvoicelink_DAO_Invoice {
     if (empty($invoiceId)) {
       throw new Exception('invoiceId can not be empty when attempting to delete a cost invoice');
     }
+    /*
+     * delete all related invoice entities
+     */
+    CRM_Costinvoicelink_BAO_InvoiceEntity::deleteByInvoiceId($invoiceId);
     $mafInvoice = new CRM_Costinvoicelink_BAO_Invoice();
     $mafInvoice->id = $invoiceId;
     $mafInvoice->delete();

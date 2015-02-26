@@ -43,6 +43,23 @@ class CRM_Costinvoicelink_Config {
   protected $contactSourceLabel = NULL;
   protected $contactSourceDateLabel = NULL;
   protected $contactSourceMotivationLabel = NULL;
+  protected $contactSelectErrorMessage = NULL;
+  /*
+   * properties to hold the activity form labels and explanation
+   */
+  protected $actFormHeader = NULL;
+  protected $actFormApplyButtonLabel = NULL;
+  protected $actSearchButtonLabel = NULL;
+  protected $actFilterLabel = NULL;
+  protected $actTypeFilterLabel = NULL;
+  protected $actDateFromFilterLabel = NULL;
+  protected $actDateToFilterLabel = NULL;
+
+  protected $actListTypeLabel = NULL;
+  protected $actListSubjectLabel = NULL;
+  protected $actListTargetsLabel = NULL;
+  protected $actListDateLabel = NULL;
+  protected $actSelectErrorMessage = NULL;
   /*
    * properties to hold the invoice form labels and explanation
    */
@@ -71,8 +88,10 @@ class CRM_Costinvoicelink_Config {
   protected $sourceNoteCustomFieldId = NULL;
   protected $sourceNoteCustomFieldName = NULL;
   protected $sourceNoteCustomFieldColumn = NULL;
-
-
+  /*
+   * properties for option groups and values
+   */
+  protected $activityTypeOptionGroupId = NULL;
 
   /**
    * Constructor
@@ -83,6 +102,8 @@ class CRM_Costinvoicelink_Config {
     $this->setPageLabels();
     $this->setInvoiceFormLabels();
     $this->setContactFormLabels();
+    $this->setActivityFormLabels();
+    $this->setActivityTypeOptionGroupId();
     $this->createSourceCustomGroupAndFields();
   }
 
@@ -98,6 +119,16 @@ class CRM_Costinvoicelink_Config {
       self::$_singleton = new CRM_Costinvoicelink_Config();
     }
     return self::$_singleton;
+  }
+
+  /**
+   * Function to get the activity type option group id
+   *
+   * @return int
+   * @access public
+   */
+  public function getActivityTypeOptionGroupId() {
+    return $this->activityTypeOptionGroupId;
   }
 
   /**
@@ -361,6 +392,16 @@ class CRM_Costinvoicelink_Config {
   }
 
   /**
+   * Function to get the no contacts selected error message
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactSelectErrorMessage() {
+    return $this->contactSelectErrorMessage;
+  }
+
+  /**
    * Function to get the external id exists message
    *
    * @return string
@@ -471,6 +512,116 @@ class CRM_Costinvoicelink_Config {
   }
 
   /**
+   * Function to get the activity form header
+   *
+   * @return string
+   * @access public
+   */
+  public function getActFormHeader() {
+    return $this->actFormHeader;
+  }
+
+  /**
+   * Function to get the activity form apply button label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActFormApplyButtonLabel() {
+    return $this->actFormApplyButtonLabel;
+  }
+
+  /**
+   * Function to get the activity search button label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActSearchButtonLabel() {
+    return $this->actSearchButtonLabel;
+  }
+
+  /**
+   * Function to get the activity filter label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActFilterLabel() {
+    return $this->actFilterLabel;
+  }
+
+  /**
+   * Function to get the activity type filter label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActTypeFilterLabel() {
+    return $this->actTypeFilterLabel;
+  }
+
+  /**
+   * Function to get the activity date from filter label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActDateFromFilterLabel() {
+    return $this->actDateFromFilterLabel;
+  }
+
+  /**
+   * Function to get the activity date to filter label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActDateToFilterLabel() {
+    return $this->actDateToFilterLabel;
+  }
+
+  /**
+   * Function to get the activity list type label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActListTypeLabel() {
+    return $this->actListTypeLabel;
+  }
+
+  /**
+   * Function to get the activity list subject label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActListSubjectLabel() {
+    return $this->actListSubjectLabel;
+  }
+
+  /**
+   * Function to get the activity list targets label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActListTargetsLabel() {
+    return $this->actListTargetsLabel;
+  }
+
+  /**
+   * Function to get the activity list date label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActListDateLabel() {
+    return $this->actListDateLabel;
+  }
+
+  /**
    * Function to set the page labels for Invoices List
    *
    * @access protected
@@ -495,7 +646,7 @@ class CRM_Costinvoicelink_Config {
   }
 
   /**
-   * Function to set the form labels for Apply Contact Form
+   * Function to set the form labels for Apply Contacts Form
    *
    * @access protected
    */
@@ -511,6 +662,26 @@ class CRM_Costinvoicelink_Config {
     $this->contactContactTypeLabel = ts('Contact Type');
     $this->contactSourceDateLabel = ts('Contact Source Date');
     $this->contactSourceMotivationLabel = ts('Contact Source Motivation');
+    $this->contactSelectErrorMessage = ts('No contacts selected');
+  }
+
+  /**
+   * Function to set the form labels for Apply Activities Form
+   *
+   * @access protected
+   */
+  protected function setActivityFormLabels() {
+    $this->actFormHeader = ts('Apply MAF Cost Invoice to Activities');
+    $this->actFormApplyButtonLabel = ts('Apply to selected activities');
+    $this->actSearchButtonLabel = ts('Search activities');
+    $this->actFilterLabel = ts('Search Activity');
+    $this->actTypeFilterLabel = ts('Activity Type');
+    $this->actDateFromFilterLabel = ts('Activity Date From');
+    $this->actDateToFilterLabel = ts('To');
+    $this->actListTypeLabel = ts('Activity Type');
+    $this->actListSubjectLabel = ts('Subject');
+    $this->actListTargetsLabel = ts('Target(s)');
+    $this->actListDateLabel = ts('Activity Date');
   }
 
   /**
@@ -581,5 +752,21 @@ class CRM_Costinvoicelink_Config {
       $customField = CRM_Costinvoicelink_Utils::createCustomField($customGroupId, $name, $name, $dataType, $htmlType, $isSearchable, $optionGroupId, $defaultValue);
     }
     return $customField;
+  }
+
+  /**
+   * Function to set the activity type option group id
+   *
+   * @throws Exception when error from API
+   * @access protected
+   */
+  protected function setActivityTypeOptionGroupId() {
+    $params = array('name' => 'activity_type', 'return' => 'id');
+    try {
+      $this->activityTypeOptionGroupId = civicrm_api3('OptionGroup', 'Getvalue', $params);
+    } catch (CiviCRM_API3_Exception $ex) {
+      throw new Exception('Could not find activity group with name activity_type,
+      error from API OptionGroup Getvalue: '.$ex->getMessage());
+    }
   }
 }
