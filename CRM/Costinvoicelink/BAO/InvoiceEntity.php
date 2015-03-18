@@ -76,4 +76,30 @@ class CRM_Costinvoicelink_BAO_InvoiceEntity extends CRM_Costinvoicelink_DAO_Invo
     $mafInvoiceEntity->delete();
     return;
   }
+
+  /**
+   * Method to check if invoice and entity are already linked
+   *
+   * @param array $values
+   * @return bool
+   * @access public
+   * @static
+   */
+  public static function invoiceEntityExists($values) {
+    $invoiceEntity = new CRM_Costinvoicelink_BAO_InvoiceEntity();
+    if (isset($values['invoice_id'])) {
+      $invoiceEntity->invoice_id = $values['invoice_id'];
+    }
+    if (isset($values['entity'])) {
+      $invoiceEntity->entity = $values['entity'];
+    }
+    if (isset($values['entity_id'])) {
+      $invoiceEntity->entity_id = $values['entity_id'];
+    }
+    if ($invoiceEntity->count() > 0) {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+  }
 }

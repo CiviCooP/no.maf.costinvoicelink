@@ -11,7 +11,14 @@
       <thead>
         <tr>
           <th>{$invoiceIdentifierLabel}</th>
-          <th>&nbsp;</th>
+          <th>{$contactSourceLabel}</th>
+          <th>{$contactFromDateLabel}</th>
+          <th>{$contactToDateLabel}</th>
+          <th>{$activityTypeLabel}</th>
+          <th>{$activitySubjectLabel}</th>
+          <th>{$activityFromDateLabel}</th>
+          <th>{$activityToDateLabel}</th>
+          <th id="nosort">&nbsp;</th>
         </tr>
       </thead>
       <tbody>
@@ -21,6 +28,13 @@
           {assign var="rowCount" value=$rowCount+1}
           <tr id="row{$rowCount}" class={$rowClass}>
             <td>{$mafInvoice.external_id}</td>
+            <td>{$mafInvoice.contact_source}</td>
+            <td>{$mafInvoice.contact_from_date|crmDate}</td>
+            <td>{$mafInvoice.contact_to_date|crmDate}</td>
+            <td>{$mafInvoice.activity_type}</td>
+            <td>{$mafInvoice.activity_subjects}</td>
+            <td>{$mafInvoice.activity_from_date|crmDate}</td>
+            <td>{$mafInvoice.activity_to_date|crmDate}</td>
             <td>
               <span>
                 {foreach from=$mafInvoice.actions item=actionLink}

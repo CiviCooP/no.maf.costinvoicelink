@@ -34,12 +34,37 @@ class CRM_Costinvoicelink_DAO_Invoice extends CRM_Core_DAO {
           'name' => 'id',
           'type' => CRM_Utils_Type::T_INT,
           'required' => true
-        ) ,
+        ),
         'external_id' => array(
           'name' => 'external_id',
           'type' => CRM_Utils_Type::T_STRING,
           'maxlength' => 45,
-        ) ,
+        ),
+        'contact_source' => array(
+          'name' => 'contact_source',
+          'type' => CRM_Utils_Type::T_STRING,
+          'maxlength' => 128,
+        ),
+        'contact_from_date' => array(
+          'name' => 'contact_from_date',
+          'type' => CRM_Utils_Type::T_DATE,
+        ),
+        'contact_to_date' => array(
+          'name' => 'contact_to_date',
+          'type' => CRM_Utils_Type::T_DATE,
+        ),
+        'activity_type_id' => array(
+          'name' => 'activity_type_id',
+          'type' => CRM_Utils_Type::T_INT,
+        ),
+        'activity_from_date' => array(
+          'name' => 'activity_from_date',
+          'type' => CRM_Utils_Type::T_DATE,
+        ),
+        'activity_to_date' => array(
+          'name' => 'activity_to_date',
+          'type' => CRM_Utils_Type::T_DATE,
+        ),
       );
     }
     return self::$_fields;
@@ -56,6 +81,12 @@ class CRM_Costinvoicelink_DAO_Invoice extends CRM_Core_DAO {
       self::$_fieldKeys = array(
         'id' => 'id',
         'external_id' => 'external_id',
+        'contact_source' => 'contact_source',
+        'contact_from_date' => 'contact_from_date',
+        'contact_to_date' => 'contact_to_date',
+        'activity_type_id' => 'activity_type_id',
+        'activity_from_date' => 'activity_from_date',
+        'activity_to_date' => 'activity_to_date'
       );
     }
     return self::$_fieldKeys;

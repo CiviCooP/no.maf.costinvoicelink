@@ -13,5 +13,6 @@ class CRM_Costinvoicelink_Upgrader extends CRM_Costinvoicelink_Upgrader_Base
   {
     $this->executeSqlFile('sql/createMafInvoice.sql');
     $this->executeSqlFile('sql/createMafInvoiceEntity.sql');
+    $this->executeSqlFile('sql/createMafInvoiceActivitySubject.sql');
   }
 }

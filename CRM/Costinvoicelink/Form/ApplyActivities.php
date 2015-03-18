@@ -16,12 +16,15 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
   protected $dfFilter = NULL;
   protected $dtFilter = NULL;
   protected $processFilter = FALSE;
+  protected $activitySubjects = array();
+  protected $invoiceId = NULL;
 
   /**
    * Overridden parent method to buildQuickForm (call parent method too)
    */
   function buildQuickForm() {
     $this->addFormElements();
+    $this->setFormTitle();
 
     parent::buildQuickForm();
   }
@@ -32,12 +35,13 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
    */
   function setDefaultValues() {
     $defaults = array();
-    $defaults['invoice_id'] = CRM_Utils_Request::retrieve('iid', 'Positive');
-    list($defaults['activityDateFrom']) = CRM_Utils_Date::setDateDefaults(date('Ymd', strtotime('first day of this month')));
-    list($defaults['activityDateTo']) = CRM_Utils_Date::setDateDefaults(date("Ymd", strtotime("+1 month")));
+    $defaults['invoice_id'] = $this->invoiceId;
+    /*
+     * set defaults on filter values if set else from database values
+     */
     if ($this->processFilter == TRUE) {
-      $selectedActivities = $this->selectActivities();
-      $this->assign('mafActivities', $selectedActivities);
+      $this->selectActivitySubjects();
+      $this->assign('mafSubjects', $this->activitySubjects);
       if (!empty($this->atFilter)) {
         $defaults['activityTypeFilter'] = $this->atFilter;
       }
@@ -47,6 +51,13 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
       if (!empty($this->dtFilter)) {
         list($defaults['activityDateTo']) = CRM_Utils_Date::setDateDefaults($this->dtFilter);
       }
+    } else {
+      $mafInvoice = CRM_Costinvoicelink_BAO_Invoice::getValues(array('id' => $this->invoiceId));
+      if (isset($mafInvoice[$this->invoiceId])) {
+        $defaults['activityTypeFilter'] = $mafInvoice[$this->invoiceId]['activity_type_id'];
+        list($defaults['activityDateFrom']) = CRM_Utils_Date::setDateDefaults($mafInvoice[$this->invoiceId]['activity_from_date']);
+        list($defaults['activityDateTo']) = CRM_Utils_Date::setDateDefaults($mafInvoice[$this->invoiceId]['activity_to_date']);
+      }
     }
     return $defaults;
   }
@@ -54,6 +65,7 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
    * Overridden parent method to initiate form
    */
   function preProcess() {
+    $this->invoiceId = CRM_Utils_Request::retrieve('iid', 'Positive');
     if (isset($_REQUEST['at']) || isset($_REQUEST['df']) || isset($_REQUEST['dt'])) {
       $this->processFilter = TRUE;
     } else {
@@ -66,29 +78,30 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
     $extensionConfig = CRM_Costinvoicelink_Config::singleton();
     $this->assign('selectLabel', $extensionConfig->getSelectLabel());
     $this->setActivityFormLabels();
+    $session = CRM_Core_Session::singleton();
+    $session->pushUserContext(CRM_Utils_System::url('civicrm/mafinvoicelist', 'reset=1', true));
   }
 
   /**
    * Function to set the activity form labels
    *
-   * @access protected
+   * @access private
    */
-  protected function setActivityFormLabels() {
+  private function setActivityFormLabels() {
     if ($this->_action == CRM_Core_Action::ADD) {
       $actionLabel = 'Add';
     } else {
       $actionLabel = 'Edit';
     }
     $extensionConfig = CRM_Costinvoicelink_Config::singleton();
-    $this->assign('actFormHeader', $actionLabel.' '.$extensionConfig->getActFormHeader());
+    $this->assign('activityFormHeader', $actionLabel.' '.$extensionConfig->getActFormHeader().' '
+      .CRM_Costinvoicelink_BAO_Invoice::getExternalIdentifierWithId($this->invoiceId));
     $this->assign('activityFilterLabel', $extensionConfig->getActFilterLabel());
     $this->assign('activityDateDateFromLabel', $extensionConfig->getActDateFromFilterLabel());
     $this->assign('activityDateToLabel', $extensionConfig->getActDateToFilterLabel());
     $this->assign('activitySearchButtonLabel', $extensionConfig->getActSearchButtonLabel());
-    $this->assign('actListTypeLabel', $extensionConfig->getActListTypeLabel());
     $this->assign('actListSubjectLabel', $extensionConfig->getActListSubjectLabel());
     $this->assign('actListTargetLabel', $extensionConfig->getActListTargetsLabel());
-    $this->assign('actListDateLabel', $extensionConfig->getActListDateLabel());
   }
 
   /**
@@ -99,8 +112,8 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
       if ($this->_submitValues['_qf_ApplyActivities_submit'] == 'Search activities') {
         $this->processSearchActivities();
       }
-      if ($this->_submitValues['_qf_ApplyActivities_submit'] == 'Apply to selected activities') {
-        $this->processApplyActivities();
+      if ($this->_submitValues['_qf_ApplyActivities_submit'] == 'Save Selected Activity Criteria') {
+        $this->processSaveActivityCriteria();
       }
     }
     parent::postProcess();
@@ -110,9 +123,9 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
    * Function to get the url params for the selected filters
    *
    * @return string
-   * @access protected
+   * @access private
    */
-  protected function getFiltersUrlParams() {
+  private function getFiltersUrlParams() {
     $urlParams = array();
     $urlParams[] = 'iid='.$this->_submitValues['invoice_id'];
     if (isset($this->_submitValues['activityTypeFilter']) && !empty($this->_submitValues['activityTypeFilter'])) {
@@ -135,9 +148,9 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
   /**
    * Function to process selected search filters
    *
-   * @access protected
+   * @access private
    */
-  protected function processSearchActivities() {
+  private function processSearchActivities() {
     if (empty($this->_submitValues['activityTypeFilter']) || empty($this->_submitValues['activityDateFrom']) || empty($this->_submitValues['activityDateTo'])) {
       $session = CRM_Core_Session::singleton();
       $session->setStatus('You have to select an activity type and an activity date range to search with', 'No activity type selected', 'error');
@@ -149,17 +162,18 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
   /**
    * Function to apply cost invoice to all selected activties
    *
-   * @access protected
+   * @access private
    */
-  protected function processApplyActivities() {
+  private function processSaveActivityCriteria() {
     $session = CRM_Core_Session::singleton();
-    if (!isset($this->_submitValues['selectedActivities']) || empty($this->_submitValues['selectedActivities'])) {
-      $session->setStatus('No activities to apply the cost invoice to were selected', 'No activities selected', 'error');
+    if (!isset($this->_submitValues['selectedSubjects']) || empty($this->_submitValues['selectedSubjects'])) {
+      $session->setStatus('No unique subjects were selected', 'No subjects selected', 'error');
       $paramString = $this->getFiltersUrlParams();
       CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/mafactivitiesapply', $paramString, true));
     } else {
-      foreach ($this->_submitValues['selectedActivities'] as $selectedActivityId) {
-        $this->linkCostInvoiceToActivity($selectedActivityId);
+      $this->saveInvoiceActivityDetails();
+      foreach ($this->_submitValues['selectedSubjects'] as $selectedSubject) {
+        $this->saveInvoiceSubject($this->invoiceId, $selectedSubject);
       }
       $session->setStatus('Cost Invoice applied to selected activities', 'Cost Invoice Applied', 'success');
       CRM_Utils_System::redirect($session->readUserContext());
@@ -167,45 +181,59 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
   }
 
   /**
-   * Function to link invoice to activity
+   * Method to save the unique subjects for the invoice
    *
-   * @param int $activityId
-   * @access protected
+   * @param int $invoiceId
+   * @param string $activitySubject
+   * @access private
    */
-  protected function linkCostInvoiceToActivity($activityId) {
+  private function saveInvoiceSubject($invoiceId, $activitySubject) {
+    $query = 'INSERT INTO civicrm_maf_invoice_activity_subject (invoice_id, activity_subject) VALUES(%1, %2)';
     $params = array(
-      'invoice_id' => $this->_submitValues['invoice_id'],
-      'entity' => 'Activity',
-      'entity_id' => $activityId);
-    $existingLinks = CRM_Costinvoicelink_BAO_InvoiceEntity::getValues($params);
-    if (empty($existingLinks)) {
-      $params['linked_date'] = date('Ymd');
-      CRM_Costinvoicelink_BAO_InvoiceEntity::add($params);
-    }
+      1 => array($invoiceId, 'Integer'),
+      2 => array($activitySubject, 'String'));
+    CRM_Core_DAO::executeQuery($query, $params);
   }
+
+  /**
+   * Method to save the invoice activity selection data at invoice level
+   *
+   * @access private
+   */
+  private function saveInvoiceActivityDetails() {
+    $params = array(
+      'id' => $this->_submitValues['invoice_id'],
+      'activity_type_id' => $this->_submitValues['activityTypeFilter'],
+      'activity_from_date' => date('Ymd', strtotime($this->_submitValues['activityDateFrom'])),
+      'activity_to_date' => date('Ymd', strtotime($this->_submitValues['activityDateTo']))
+    );
+    $savedInvoice = CRM_Costinvoicelink_BAO_Invoice::add($params);
+    $this->invoiceId = $savedInvoice['id'];
+  }
+
 
   /**
    * Function to add form elements
    *
-   * @access protected
+   * @access private
    */
-  protected function addFormElements() {
+  private function addFormElements() {
     $extensionConfig = CRM_Costinvoicelink_Config::singleton();
     $this->add('text', 'invoice_id', ts('InvoiceId'));
     $this->add('select', 'activityTypeFilter', $extensionConfig->getActTypeFilterLabel(), $this->activityTypes, true);
     $this->addDate('activityDateFrom', $extensionConfig->getActDateFromFilterLabel(), false);
     $this->addDate('activityDateTo', $extensionConfig->getActDateToFilterLabel(), false);
     $this->addButtons(array(
-      array('type' => 'submit', 'name' => $extensionConfig->getActFormApplyButtonLabel()),
+      array('type' => 'submit', 'name' => $extensionConfig->getActSaveButtonLabel()),
       array('type' => 'cancel', 'name' => $extensionConfig->getCancelButtonLabel())));
   }
 
   /**
    * Function to get the activity types
    *
-   * @access protected
+   * @access private
    */
-  protected function getActivityTypes() {
+  private function getActivityTypes() {
     $extensionConfig = CRM_Costinvoicelink_Config::singleton();
     $params = array(
       'option_group_id' => $extensionConfig->getActivityTypeOptionGroupId(),
@@ -226,10 +254,10 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
    * Function to build activity query
    *
    * @return string $activityQuery
-   * @access protected
+   * @access private
    */
-  protected function buildActivityQuery() {
-    $activityQuery = 'SELECT id, subject, activity_date_time, activity_type_id FROM civicrm_activity';
+  private function buildActivityQuery() {
+    $activityQuery = 'SELECT DISTINCT(subject) FROM civicrm_activity';
     $activityWhere = $this->getActivityWhereClauses();
     return $activityQuery.' WHERE '.$activityWhere;
   }
@@ -238,9 +266,9 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
    * Function to build activity where clauses
    *
    * @return string
-   * @access protected
+   * @access private
    */
-  protected function getActivityWhereClauses() {
+  private function getActivityWhereClauses() {
     $count = 1;
     $activityWhereClauses[] = 'is_current_revision = %'.$count;
     if (!empty($this->atFilter)) {
@@ -262,9 +290,9 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
    * Function to build params for activity query
    *
    * @return array $queryParams
-   * @access protected
+   * @access private
    */
-  protected function buildActivityQueryParams() {
+  private function buildActivityQueryParams() {
     $count = 1;
     $queryParams = array();
     $queryParams[$count] = array(1, 'Integer');
@@ -287,16 +315,16 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
    * Function to select activities
    *
    * @return array $activities
+   * @access private
    */
-  protected function selectActivities() {
-    $activities = array();
+  private function selectActivitySubjects() {
+    $this->activitySubjects = array();
     $activityQuery = $this->buildActivityQuery();
     $activityParams = $this->buildActivityQueryParams();
     $daoActivity = CRM_Core_DAO::executeQuery($activityQuery, $activityParams);
     while ($daoActivity->fetch()) {
-      $activities[$daoActivity->id] = $this->createActivityRow($daoActivity);
+      $this->activitySubjects[] = $this->createActivityRow($daoActivity);
     }
-    return $activities;
   }
 
   /**
@@ -304,16 +332,11 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
    *
    * @param object $daoActivity
    * @return array $row
-   * @access protected
+   * @access private
    */
-  protected function createActivityRow($daoActivity) {
-    $extensionConfig = CRM_Costinvoicelink_Config::singleton();
+  private function createActivityRow($daoActivity) {
     $row = array();
-    $row['activity_type'] = CRM_Costinvoicelink_Utils::getOptionValueLabel($daoActivity->activity_type_id,
-      $extensionConfig->getActivityTypeOptionGroupId());
     $row['subject'] = $daoActivity->subject;
-    $row['targets'] = $this->getActivityTargets($daoActivity->id);
-    $row['activity_date'] = $daoActivity->activity_date_time;
     return $row;
   }
 
@@ -322,10 +345,10 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
    *
    * @param int $activityId
    * @return string $targetString
-   * @access protected
+   * @access private
    *
    */
-  protected function getActivityTargets($activityId) {
+  private function getActivityTargets($activityId) {
     $targetString = '';
     $targetContactNames = array();
     $targetCount = 0;
@@ -346,5 +369,15 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
       $targetString = implode('; ', $targetContactNames);
     }
     return $targetString;
+  }
+
+  /**
+   * Method to set the form title based on action and data coming in
+   *
+   * @access private
+   */
+  private function setFormTitle() {
+    $title = 'Cost Invoice Link';
+    CRM_Utils_System::setTitle($title);
   }
 }

@@ -80,4 +80,19 @@ class CRM_Costinvoicelink_BAO_Invoice extends CRM_Costinvoicelink_DAO_Invoice {
     $mafInvoice->delete();
     return;
   }
+
+  /**
+   * Method to get external identifier with invoiceId
+   *
+   * @param int $invoiceId
+   * @return string
+   * @access public
+   * @static
+   */
+  public static function getExternalIdentifierWithId($invoiceId) {
+    $mafInvoice = new CRM_Costinvoicelink_BAO_Invoice();
+    $mafInvoice->id = $invoiceId;
+    $mafInvoice->find(true);
+    return $mafInvoice->external_id;
+  }
 }

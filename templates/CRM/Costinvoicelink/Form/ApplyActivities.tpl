@@ -1,3 +1,5 @@
+<h3>{$activityFormHeader}</h3>
+
 {* filter activities *}
 <div class="crm-section">
   <div hidden="1" class="content">{$form.invoice_id.html}</div>

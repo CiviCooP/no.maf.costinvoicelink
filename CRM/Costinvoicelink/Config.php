@@ -19,6 +19,7 @@ class CRM_Costinvoicelink_Config {
    * generic form labels
    */
   protected $cancelButtonLabel = NULL;
+  protected $saveButtonLabel = NULL;
   protected $selectLabel = NULL;
 
   /*
@@ -32,40 +33,34 @@ class CRM_Costinvoicelink_Config {
    * properties to hold the contact form labels and explanation
    */
   protected $contactFormHeader = NULL;
-  protected $contactFormApplyButtonLabel = NULL;
-  protected $contactSearchButtonLabel = NULL;
-  protected $contactFilterLabel = NULL;
   protected $sourceDateFromLabel = NULL;
   protected $sourceDateToLabel = NULL;
-
-  protected $contactDisplayNameLabel = NULL;
-  protected $contactContactTypeLabel = NULL;
   protected $contactSourceLabel = NULL;
-  protected $contactSourceDateLabel = NULL;
-  protected $contactSourceMotivationLabel = NULL;
-  protected $contactSelectErrorMessage = NULL;
   /*
    * properties to hold the activity form labels and explanation
    */
   protected $actFormHeader = NULL;
-  protected $actFormApplyButtonLabel = NULL;
+  protected $actSaveButtonLabel = NULL;
   protected $actSearchButtonLabel = NULL;
   protected $actFilterLabel = NULL;
   protected $actTypeFilterLabel = NULL;
   protected $actDateFromFilterLabel = NULL;
   protected $actDateToFilterLabel = NULL;
 
-  protected $actListTypeLabel = NULL;
   protected $actListSubjectLabel = NULL;
   protected $actListTargetsLabel = NULL;
-  protected $actListDateLabel = NULL;
   protected $actSelectErrorMessage = NULL;
   /*
-   * properties to hold the invoice form labels and explanation
+   * properties to hold the invoice form/page labels and explanation
    */
   protected $invoiceFormHeader = NULL;
   protected $invoiceFormInvoiceIdentifierLabel = NULL;
   protected $externalIdExistsMessage = NULL;
+  protected $activitySubjectLabel = NULL;
+  protected $activityDateFromLabel = NULL;
+  protected $activityDateToLabel = NULL;
+  protected $contactSourceErrorMessage = NULL;
+  protected $contactDateErrorMessage = NULL;
   /*
    * properties for source custom group and fields
    */
@@ -98,6 +93,7 @@ class CRM_Costinvoicelink_Config {
    */
   function __construct() {
     $this->cancelButtonLabel = ts('Cancel');
+    $this->saveButtonLabel = ts('Save');
     $this->selectLabel = ts('Select');
     $this->setPageLabels();
     $this->setInvoiceFormLabels();
@@ -119,6 +115,36 @@ class CRM_Costinvoicelink_Config {
       self::$_singleton = new CRM_Costinvoicelink_Config();
     }
     return self::$_singleton;
+  }
+
+  /**
+   * Method to get the select label
+   *
+   * @return string
+   * @access public
+   */
+  public function getSelectLabel() {
+    return $this->selectLabel;
+  }
+
+  /**
+   * Method to get the contact source date range error message
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactDateErrorMessage() {
+    return $this->contactDateErrorMessage;
+  }
+
+  /**
+   * Method to get the contact source select list error message
+   *
+   * @return string
+   * @access public
+   */
+  public function getContactSourceErrorMessage() {
+    return $this->contactSourceErrorMessage;
   }
 
   /**
@@ -312,17 +338,17 @@ class CRM_Costinvoicelink_Config {
   }
 
   /**
-   * Function to get the select label
+   * Function to get the save button form Label
    *
    * @return string
    * @access public
    */
-  public function getSelectLabel() {
-    return $this->selectLabel;
+  public function getSaveButtonLabel() {
+    return $this->saveButtonLabel;
   }
 
   /**
-   * Function to get the contact source label for contact form
+   * Method to get the contact source label for contact form
    *
    * @return string
    * @access public
@@ -332,43 +358,32 @@ class CRM_Costinvoicelink_Config {
   }
 
   /**
-   * Function to get the contact display name form label
+   * Method to get the activity date from label for invoice page
    *
    * @return string
    * @access public
    */
-  public function getContactDisplayNameLabel() {
-    return $this->contactDisplayNameLabel;
+  public function getActivityDateFromLabel() {
+    return $this->activityDateFromLabel;
   }
 
   /**
-   * Function to get the contact type form label
+   * Method to get the activity date to label for invoice page
    *
    * @return string
    * @access public
    */
-  public function getContactContactTypeLabel() {
-    return $this->contactContactTypeLabel;
+  public function getActivityDateToLabel() {
+    return $this->activityDateToLabel;
   }
-
   /**
-   * Function to get the contact source date label
+   * Method to get the activity subject label for the invoice page
    *
    * @return string
    * @access public
    */
-  public function getContactSourceDateLabel() {
-    return $this->contactSourceDateLabel;
-  }
-
-  /**
-   * Function to get the contact source motivation label
-   *
-   * @return string
-   * @access public
-   */
-  public function getContactSourceMotivationLabel() {
-    return $this->contactSourceMotivationLabel;
+  public function getActivitySubjectLabel() {
+    return $this->activitySubjectLabel;
   }
 
   /**
@@ -389,16 +404,6 @@ class CRM_Costinvoicelink_Config {
    */
   public function getSourceDateToLabel() {
     return $this->sourceDateToLabel;
-  }
-
-  /**
-   * Function to get the no contacts selected error message
-   *
-   * @return string
-   * @access public
-   */
-  public function getContactSelectErrorMessage() {
-    return $this->contactSelectErrorMessage;
   }
 
   /**
@@ -429,36 +434,6 @@ class CRM_Costinvoicelink_Config {
    */
   public function getContactFormHeader() {
     return $this->contactFormHeader;
-  }
-
-  /**
-   * Function to get the contactFormApplyButtonLabel
-   *
-   * @return string
-   * @access public
-   */
-  public function getContactFormApplyButtonLabel() {
-    return $this->contactFormApplyButtonLabel;
-  }
-
-  /**
-   * Function to get the contactSearchButtonLabel
-   *
-   * @return string
-   * @access public
-   */
-  public function getContactSearchButtonLabel() {
-    return $this->contactSearchButtonLabel;
-  }
-
-  /**
-   * Function to get the contactFilterLabel
-   *
-   * @return string
-   * @access public
-   */
-  public function getContactFilterLabel() {
-    return $this->contactFilterLabel;
   }
 
   /**
@@ -522,16 +497,6 @@ class CRM_Costinvoicelink_Config {
   }
 
   /**
-   * Function to get the activity form apply button label
-   *
-   * @return string
-   * @access public
-   */
-  public function getActFormApplyButtonLabel() {
-    return $this->actFormApplyButtonLabel;
-  }
-
-  /**
    * Function to get the activity search button label
    *
    * @return string
@@ -539,6 +504,16 @@ class CRM_Costinvoicelink_Config {
    */
   public function getActSearchButtonLabel() {
     return $this->actSearchButtonLabel;
+  }
+
+  /**
+   * Method to get the activity save button label
+   *
+   * @return string
+   * @access public
+   */
+  public function getActSaveButtonLabel() {
+    return $this->actSaveButtonLabel;
   }
 
   /**
@@ -582,16 +557,6 @@ class CRM_Costinvoicelink_Config {
   }
 
   /**
-   * Function to get the activity list type label
-   *
-   * @return string
-   * @access public
-   */
-  public function getActListTypeLabel() {
-    return $this->actListTypeLabel;
-  }
-
-  /**
    * Function to get the activity list subject label
    *
    * @return string
@@ -609,16 +574,6 @@ class CRM_Costinvoicelink_Config {
    */
   public function getActListTargetsLabel() {
     return $this->actListTargetsLabel;
-  }
-
-  /**
-   * Function to get the activity list date label
-   *
-   * @return string
-   * @access public
-   */
-  public function getActListDateLabel() {
-    return $this->actListDateLabel;
   }
 
   /**
@@ -643,6 +598,9 @@ class CRM_Costinvoicelink_Config {
     $this->invoiceFormHeader = ts('MAF Cost Invoice');
     $this->invoiceFormInvoiceIdentifierLabel = ts('Invoice Identifier');
     $this->externalIdExistsMessage = ts('Invoice Identifier already exists in the database, can not be added');
+    $this->activitySubjectLabel = ts('Unique subject(s)');
+    $this->activityDateFromLabel = ts('Activity Date From');
+    $this->activityDateToLabel = ts('Activity Date To');
   }
 
   /**
@@ -651,18 +609,12 @@ class CRM_Costinvoicelink_Config {
    * @access protected
    */
   protected function setContactFormLabels() {
-    $this->contactFormHeader = ts('Apply MAF Cost Invoice to Contacts');
-    $this->contactFormApplyButtonLabel = ts('Apply to selected contacts');
-    $this->contactSearchButtonLabel = ts('Search contacts');
-    $this->contactFilterLabel = ts('Search contact');
+    $this->contactFormHeader = ts('Contact Selection Criteria MAF Cost Invoice');
     $this->contactSourceLabel = ts('Contact source');
     $this->sourceDateFromLabel = ts('Source Date From');
     $this->sourceDateToLabel = ts('Source Date To');
-    $this->contactDisplayNameLabel = ts('Contact Name');
-    $this->contactContactTypeLabel = ts('Contact Type');
-    $this->contactSourceDateLabel = ts('Contact Source Date');
-    $this->contactSourceMotivationLabel = ts('Contact Source Motivation');
-    $this->contactSelectErrorMessage = ts('No contacts selected');
+    $this->contactSourceErrorMessage = ts('You have to select a contact source');
+    $this->contactDateErrorMessage = ts('Date From has to be earlier than Date To');
   }
 
   /**
@@ -671,17 +623,15 @@ class CRM_Costinvoicelink_Config {
    * @access protected
    */
   protected function setActivityFormLabels() {
-    $this->actFormHeader = ts('Apply MAF Cost Invoice to Activities');
-    $this->actFormApplyButtonLabel = ts('Apply to selected activities');
+    $this->actFormHeader = ts('Activity Selection Criteria MAF Cost Invoice');
+    $this->actSaveButtonLabel = ts('Save Selected Activity Criteria');
     $this->actSearchButtonLabel = ts('Search activities');
     $this->actFilterLabel = ts('Search Activity');
     $this->actTypeFilterLabel = ts('Activity Type');
     $this->actDateFromFilterLabel = ts('Activity Date From');
     $this->actDateToFilterLabel = ts('To');
-    $this->actListTypeLabel = ts('Activity Type');
-    $this->actListSubjectLabel = ts('Subject');
-    $this->actListTargetsLabel = ts('Target(s)');
-    $this->actListDateLabel = ts('Activity Date');
+    $this->actListSubjectLabel = ts('Unique subject');
+    $this->actListTargetsLabel = ts('Contact Count');
   }
 
   /**

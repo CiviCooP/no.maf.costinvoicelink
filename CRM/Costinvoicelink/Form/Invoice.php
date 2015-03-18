@@ -45,7 +45,7 @@ class CRM_Costinvoicelink_Form_Invoice extends CRM_Core_Form {
       CRM_Costinvoicelink_BAO_Invoice::deleteById(CRM_Utils_Request::retrieve('iid', 'Positive'));
       $session = CRM_Core_Session::singleton();
       $session->setStatus('Cost Invoice deleted', 'Delete', 'success');
-      CRM_Utils_System::redirect($session->readUserContext());
+      $session->pushUserContext(CRM_Utils_System::url('civicrm/mafinvoicelist', 'reset=1', true));
     }
   }
 
