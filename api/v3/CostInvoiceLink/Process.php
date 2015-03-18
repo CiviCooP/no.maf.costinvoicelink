@@ -27,10 +27,10 @@ function _processCostInvoices() {
   $mafInvoices = CRM_Costinvoicelink_BAO_Invoice::getValues(array());
   foreach ($mafInvoices as $mafInvoiceId => $mafInvoice) {
     $returnValues[] = 'invoice '.$mafInvoice['external_id'];
-    if (!empty($mafInvoice['contact_source'])) {
+    if (isset($mafInvoice['contact_source']) && !empty($mafInvoice['contact_source'])) {
       _applyInvoiceToContacts($mafInvoice);
     }
-    if (!empty($mafInvoice['activity_type_id'])) {
+    if (isset($mafInvoice['activity_type_id']) && !empty($mafInvoice['activity_type_id'])) {
       _applyInvoiceToActivities($mafInvoice);
     }
   }
@@ -45,14 +45,12 @@ function _processCostInvoices() {
 function _applyInvoiceToContacts($mafInvoice) {
   $extensionConfig = CRM_Costinvoicelink_Config::singleton();
   $query = 'SELECT entity_id FROM '.$extensionConfig->getSourceCustomGroupTable()
-    .' WHERE is_deleted = &1 AND is_deceased = %1 AND '
-    .$extensionConfig->getSourceSourceCustomFieldColumn().' = %2 AND '
-    .$extensionConfig->getSourceDateCustomFieldColumn().' BETWEEN %3 AND %4';
+    .' WHERE '.$extensionConfig->getSourceSourceCustomFieldColumn().' = %1 AND '
+    .$extensionConfig->getSourceDateCustomFieldColumn().' BETWEEN %2 AND %3';
   $queryParams = array(
-    1 => array(0, 'Integer'),
-    2 => array($mafInvoice['contact_source'], 'String'),
-    3 => array($mafInvoice['contact_from_date'], 'Date'),
-    4 => array($mafInvoice['contact_to_date'], 'Date'));
+    1 => array($mafInvoice['contact_source'], 'String'),
+    2 => array(date('Ymd', strtotime($mafInvoice['contact_from_date'])), 'Date'),
+    3 => array(date('Ymd', strtotime($mafInvoice['contact_to_date'])), 'Date'));
 
   $dao = CRM_Core_DAO::executeQuery($query, $queryParams);
 
@@ -62,7 +60,7 @@ function _applyInvoiceToContacts($mafInvoice) {
       'entity' => 'Contact',
       'entity_id' => $dao->entity_id);
     if (CRM_Costinvoicelink_BAO_InvoiceEntity::invoiceEntityExists($contactParams) == FALSE) {
-      $contactParams['link_date'] = date('Ymd');
+      $contactParams['linked_date'] = date('Ymd');
       CRM_Costinvoicelink_BAO_InvoiceEntity::add($contactParams);
     }
   }
@@ -77,14 +75,14 @@ function _applyInvoiceToActivities($mafInvoice) {
   /*
    * first retrieve all subjects for invoice
    */
-  $activitySubjects = _getActivitySubject($mafInvoice['id']);
+  $activitySubjects = _getActivitySubjects($mafInvoice['id']);
   $query = 'SELECT id, subject FROM civicrm_activity WHERE is_current_revision = %1 AND
     activity_type_id = %2 AND activity_date_time BETWEEN %3 AND %4';
   $queryParams = array(
     1 => array(1, 'Integer'),
     2 => array($mafInvoice['activity_type_id'], 'Integer'),
-    3 => array($mafInvoice['activity_from_date'], 'Date'),
-    4 => array($mafInvoice['activity_to_date'], 'Date'));
+    3 => array(date('Ymd', strtotime($mafInvoice['activity_from_date'])), 'Date'),
+    4 => array(date('Ymd', strtotime($mafInvoice['activity_to_date'])), 'Date'));
   $dao = CRM_Core_DAO::executeQuery($query, $queryParams);
   while ($dao->fetch()) {
     if (in_array($dao->subject, $activitySubjects)) {
@@ -93,7 +91,7 @@ function _applyInvoiceToActivities($mafInvoice) {
         'entity' => 'Activity',
         'entity_id' => $dao->id);
       if (CRM_Costinvoicelink_BAO_InvoiceEntity::invoiceEntityExists($activityParams) == FALSE) {
-        $activityParams['link_date'] = date('Ymd');
+        $activityParams['linked_date'] = date('Ymd');
         CRM_Costinvoicelink_BAO_InvoiceEntity::add($activityParams);
       }
     }
