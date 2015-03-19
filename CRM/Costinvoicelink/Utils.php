@@ -155,7 +155,7 @@ class CRM_Costinvoicelink_Utils {
    */
   public static function createOptionGroup($optionGroupName) {
     $optionGroup = self::getOptionGroup($optionGroupName);
-    if (empty($optionGroup)) {
+    if (civicrm_error($optionGroup)) {
       $params = array(
         'name' => $optionGroupName,
         'title' => self::createLabelFromName($optionGroupName),
