@@ -323,20 +323,49 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
     $activityParams = $this->buildActivityQueryParams();
     $daoActivity = CRM_Core_DAO::executeQuery($activityQuery, $activityParams);
     while ($daoActivity->fetch()) {
-      $this->activitySubjects[] = $this->createActivityRow($daoActivity);
+      $this->activitySubjects[] = $this->buildSubjectRow($daoActivity);
     }
   }
 
   /**
    * Function to create a row for an activity
+   * and count the targets for the activity
    *
    * @param object $daoActivity
    * @return array $row
    * @access private
    */
-  private function createActivityRow($daoActivity) {
+  private function buildSubjectRow($daoActivity) {
     $row = array();
     $row['subject'] = $daoActivity->subject;
+    $totalTargetCount = 0;
+    /*
+     * first retrieve all activities within selection
+     */
+    $targetActivityQuery = 'SELECT id FROM civicrm_activity WHERE is_current_revision = %1
+      AND activity_type_id = %2 AND subject = %3 AND activity_date_time BETWEEN %4 AND %5';
+    $targetActivityQueryParams = array(
+      1 => array(1, 'Integer'),
+      2 => array($this->atFilter, 'Integer'),
+      3 => array($daoActivity->subject, 'String'),
+      4 => array(date('Ymd', strtotime($this->dfFilter)), 'Date'),
+      5 => array(date('Ymd', strtotime($this->dtFilter)), 'Date'));
+    $daoTargetActivity = CRM_Core_DAO::executeQuery($targetActivityQuery, $targetActivityQueryParams);
+    /*
+     * for every found activity, count the number of target contacts and add to total
+     */
+    while ($daoTargetActivity->fetch()) {
+      $targetQuery = 'SELECT COUNT(*) as targetCount FROM civicrm_activity_contact
+      WHERE record_type_id = %1 AND civicrm_activity_contact.activity_id = %2';
+      $targetParams = array(
+        1 => array(3, 'Integer'),
+        2 => array($daoTargetActivity->id, 'Integer'));
+      $daoTarget = CRM_Core_DAO::executeQuery($targetQuery, $targetParams);
+      if ($daoTarget->fetch()) {
+        $totalTargetCount = $totalTargetCount + $daoTarget->targetCount;
+      }
+    }
+    $row['targets'] = $totalTargetCount;
     return $row;
   }
 
