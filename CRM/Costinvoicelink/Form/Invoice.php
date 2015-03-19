@@ -32,6 +32,8 @@ class CRM_Costinvoicelink_Form_Invoice extends CRM_Core_Form {
    */
   function preProcess() {
     $extensionConfig = CRM_Costinvoicelink_Config::singleton();
+    $session = CRM_Core_Session::singleton();
+    $session->pushUserContext(CRM_Utils_System::url('civicrm/mafinvoicelist', 'reset=1', true));
     if ($this->_action == CRM_Core_Action::ADD) {
       $actionLabel = 'Add';
     } else {
@@ -43,9 +45,8 @@ class CRM_Costinvoicelink_Form_Invoice extends CRM_Core_Form {
      */
     if ($this->_action == CRM_Core_Action::DELETE) {
       CRM_Costinvoicelink_BAO_Invoice::deleteById(CRM_Utils_Request::retrieve('iid', 'Positive'));
-      $session = CRM_Core_Session::singleton();
       $session->setStatus('Cost Invoice deleted', 'Delete', 'success');
-      $session->pushUserContext(CRM_Utils_System::url('civicrm/mafinvoicelist', 'reset=1', true));
+      CRM_Utils_System::redirect($session->readUserContext());
     }
   }
 

@@ -53,9 +53,13 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
       }
     } else {
       $mafInvoice = CRM_Costinvoicelink_BAO_Invoice::getValues(array('id' => $this->invoiceId));
-      if (isset($mafInvoice[$this->invoiceId])) {
+      if (isset($mafInvoice[$this->invoiceId]['activity_type_id'])) {
         $defaults['activityTypeFilter'] = $mafInvoice[$this->invoiceId]['activity_type_id'];
+      }
+      if (isset($mafInvoice[$this->invoiceId]['activity_from_date'])) {
         list($defaults['activityDateFrom']) = CRM_Utils_Date::setDateDefaults($mafInvoice[$this->invoiceId]['activity_from_date']);
+      }
+      if (isset($mafInvoice[$this->invoiceId]['activity_to_date'])) {
         list($defaults['activityDateTo']) = CRM_Utils_Date::setDateDefaults($mafInvoice[$this->invoiceId]['activity_to_date']);
       }
     }
@@ -237,6 +241,7 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
     $extensionConfig = CRM_Costinvoicelink_Config::singleton();
     $params = array(
       'option_group_id' => $extensionConfig->getActivityTypeOptionGroupId(),
+      'is_active' => 1,
       'options' => array('limit'=>0));
     try {
       $optionValues = civicrm_api3('OptionValue', 'Get', $params);
