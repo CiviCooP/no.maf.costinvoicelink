@@ -48,9 +48,15 @@ function civicrm_api3_contact_source_migrate($params) {
   $newMotivationParams = array('id' => $newMotivationCustomFieldId, 'return' => 'column_name');
   $newMotivationColumn = civicrm_api3('CustomField', 'Getvalue', $newMotivationParams);
 
-  $oldQuery = 'SELECT * FROM '.$oldCustomGroupTable;
-  $oldDao = CRM_Core_DAO::executeQuery($oldQuery);
+  $oldQuery = 'SELECT * FROM '.$oldCustomGroupTable.' WHERE is_process_migration = %1 LIMIT 2500';
+  $oldParams = array(1 => array(0, 'Integer'));
+  $oldDao = CRM_Core_DAO::executeQuery($oldQuery, $oldParams);
   while ($oldDao->fetch()) {
+    $oldUpdateQuery = 'UPDATE '.$oldCustomGroupTable.' SET is_process_migration = %1 WHERE id = %2';
+    $oldUpdateParams = array(
+      1 => array(1, 'Integer'),
+      2 => array($oldDao->id, 'Integer'));
+    CRM_Core_DAO::executeQuery($oldUpdateQuery, $oldUpdateParams);
     if (!empty($oldDao->$oldSourceColumn) || !empty($oldDao->$oldDateColumn) || !empty($oldDao->$oldNoteColumn) || !empty($oldDao->$oldMotivationColumn)) {
       $replaceClauses = array();
       $replaceParams = array();
