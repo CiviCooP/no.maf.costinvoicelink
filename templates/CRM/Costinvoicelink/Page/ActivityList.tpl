@@ -3,8 +3,8 @@
   <div id="mafactivity_wrapper" class="dataTables_wrapper">
     <table id="mafactivity-table" class="display">
       <thead>
-        <tr>
-          <th id="nosort">{$selectLabel}</th>
+        <tr id="headerRow">
+          <th id="nosort">&nbsp;<input type="checkbox" id="selectAllSubjects">&nbsp;(select all)</th>
           <th>{$actListSubjectLabel}</th>
           <th>{$actListTargetLabel}</th>
         </tr>
@@ -29,4 +29,18 @@
     </table>
   </div>
 </div>
-
+{literal}
+  <script type="text/javascript">
+    cj('#selectAllSubjects').click(function() {
+      if(this.checked) {
+        cj(':checkbox').each(function() {
+          this.checked = true;
+        });
+      } else {
+        cj(':checkbox').each(function () {
+          this.checked = false;
+        });
+      }
+    });
+  </script>
+{/literal}

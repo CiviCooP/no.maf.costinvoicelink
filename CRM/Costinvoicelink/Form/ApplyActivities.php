@@ -355,6 +355,9 @@ class CRM_Costinvoicelink_Form_ApplyActivities extends CRM_Core_Form {
       3 => array($daoActivity->subject, 'String'),
       4 => array(date('Ymd', strtotime($this->dfFilter)), 'Date'),
       5 => array(date('Ymd', strtotime($this->dtFilter)), 'Date'));
+    if (empty($daoActivity->subject)) {
+      $targetActivityQueryParams[3] = array('', 'String');
+    }
     $daoTargetActivity = CRM_Core_DAO::executeQuery($targetActivityQuery, $targetActivityQueryParams);
     /*
      * for every found activity, count the number of target contacts and add to total
