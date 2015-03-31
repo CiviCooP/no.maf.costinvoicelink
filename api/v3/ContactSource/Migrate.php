@@ -11,17 +11,17 @@ set_time_limit(0);
  */
 function civicrm_api3_contact_source_migrate($params) {
   $oldCustomGroupId = 1577;
-  $newCustomGroupId = 1595;
+  $newCustomGroupId = 1596;
 
   $oldSourceCustomFieldId = 83;
   $oldDateCustomFieldId = 31;
   $oldNoteCustomFieldId = 88;
   $oldMotivationCustomFieldId = 100;
 
-  $newSourceCustomFieldId = 131;
-  $newDateCustomFieldId = 132;
-  $newNoteCustomFieldId = 134;
-  $newMotivationCustomFieldId = 133;
+  $newSourceCustomFieldId = 140;
+  $newDateCustomFieldId = 141;
+  $newNoteCustomFieldId = 143;
+  $newMotivationCustomFieldId = 142;
 
   $oldCustomGroupParams = array('id' => $oldCustomGroupId, 'return' => 'table_name');
   $oldCustomGroupTable = civicrm_api3('CustomGroup', 'Getvalue', $oldCustomGroupParams);
