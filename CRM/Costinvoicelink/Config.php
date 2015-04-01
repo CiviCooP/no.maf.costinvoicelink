@@ -658,7 +658,7 @@ class CRM_Costinvoicelink_Config {
    * @access protected
    */
   protected function createSourceCustomFields() {
-    $this->sourceSourceCustomFieldName = 'contact_source';
+    $this->sourceSourceCustomFieldName = 'maf_source';
     $sourceOptionGroup = CRM_Costinvoicelink_Utils::createOptionGroup('maf_contact_source');
     $this->contactSourceOptionGroupId = $sourceOptionGroup['id'];
     $customField = $this->createSingleCustomField($this->sourceCustomGroupId, $this->sourceSourceCustomFieldName, 'String', 'Select', 1, $sourceOptionGroup['id']);
